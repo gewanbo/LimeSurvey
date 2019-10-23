@@ -151,7 +151,8 @@ abstract class CGridColumn extends CComponent
 			}
 		}
 		echo CHtml::openTag('td',$options);
-		$this->renderDataCellContent($row,$data);
+		//$this->renderDataCellContent($row,$data);
+        echo $this->getDataCellContent($row);
 		echo '</td>';
 	}
 
