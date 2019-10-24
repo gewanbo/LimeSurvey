@@ -24,8 +24,6 @@ Yii::import('application.helpers.sanitize_helper', true);
  */
 function gT($sToTranslate, $sEscapeMode = 'html', $sLanguage = null)
 {
-    var_dump($sToTranslate);
-    var_dump(Yii::t('', $sToTranslate, array(), null, $sLanguage));exit;
     return quoteText(Yii::t('', $sToTranslate, array(), null, $sLanguage), $sEscapeMode);
 }
 
@@ -1099,7 +1097,7 @@ function getExtendedAnswer($iSurveyID, $sFieldCode, $sValue, $sLanguage)
     //Returns NULL if question type does not suit
     if (strpos($sFieldCode, "{$iSurveyID}X") === 0) {
 //Only check if it looks like a real fieldcode
-        $fieldmap = createFieldMap($survey, 'short', false, false, $sLanguage);var_dump($fieldmap);
+        $fieldmap = createFieldMap($survey, 'short', false, false, $sLanguage);
         if (isset($fieldmap[$sFieldCode])) {
             $fields = $fieldmap[$sFieldCode];
         } else {
@@ -1187,11 +1185,10 @@ function getExtendedAnswer($iSurveyID, $sFieldCode, $sValue, $sLanguage)
                 } else {
                     $iScaleID = 0;
                 }
-                var_dump($iScaleID);
-                var_dump($sValue);
+
                 $result = Answer::model()->getAnswerFromCode($fields['qid'], $sValue, $sLanguage, $iScaleID);
                 foreach ($result as $row) {
-                    $this_answer = $row['answer'];var_dump($this_answer);
+                    $this_answer = $row['answer'];
                 } // while
                 if ($sValue == "-oth-") {
                     $this_answer = gT("Other", null, $sLanguage);
@@ -1742,13 +1739,16 @@ function createFieldMap($survey, $style = 'short', $force_refresh = false, $ques
                 if (isset($fieldmap[$fieldname])) {
                     $aDuplicateQIDs[$arow['qid']] = array('fieldname'=>$fieldname, 'question'=>$arow['question'], 'gid'=>$arow['gid']);
                 }
-                $fieldmap[$fieldname] = array("fieldname"=>$fieldname,
+                $fieldmap[$fieldname] = array(
+                    "fieldname"=>$fieldname,
                     'type'=>$arow['type'],
                     'sid'=>$surveyid,
                     'gid'=>$arow['gid'],
                     'qid'=>$arow['qid'],
                     'aid'=>$abrow['title'],
-                    'sqid'=>$abrow['qid']);
+                    'sqid'=>$abrow['qid'],
+                    'scale_id'=>$abrow['scale_id']
+                );
                 if ($style == "full") {
                     $fieldmap[$fieldname]['title'] = $arow['title'];
                     $fieldmap[$fieldname]['question'] = $arow['question'];
