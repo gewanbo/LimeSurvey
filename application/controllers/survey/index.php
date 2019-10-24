@@ -507,7 +507,7 @@ class index extends CAction
         if (!isset($_SESSION['survey_'.$surveyid]['srid']) && $thissurvey['anonymized'] == "N" && $thissurvey['active'] == "Y" && isset($token) && $token != '') {
 
             // load previous answers if any (dataentry with nosubmit)
-                $oResponses = Response::model($surveyid)->findAllByAttributes(array(
+            $oResponses = Response::model($surveyid)->findAllByAttributes(array(
                 'token' => $token
             ), array('order' => 'id DESC'));
 
@@ -540,7 +540,8 @@ class index extends CAction
 
                             $_SESSION['survey_'.$surveyid]['LEMtokenResume'] = true;
 
-                            // If the response was completed and user is allowed to edit after completion start at the beginning and not at the last page - just makes more sense
+                            // If the response was completed and user is allowed to edit after completion start at the
+                            // beginning and not at the last page - just makes more sense
                             if (!($oResponse->submitdate && $thissurvey['alloweditaftercompletion'] == 'Y')) {
                                 $_SESSION['survey_'.$surveyid]['step'] = $oResponse->lastpage;
                             }
