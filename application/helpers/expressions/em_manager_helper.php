@@ -5627,15 +5627,17 @@
                     {
                         if ($finished && ($oSurveyResponse->submitdate == null || Survey::model()->findByPk($this->sid)->alloweditaftercompletion == 'Y')) {
                             $sQuery = 'UPDATE '.$this->surveyOptions['tablename'] . " SET ";
-                            if($this->surveyOptions['datestamp'])
-                            {
-                                // Replace with date("Y-m-d H:i:s") ? See timeadjust
-                                $sQuery .= App()->db->quoteColumnName('submitdate') . "=" . App()->db->quoteValue(dateShift(date("Y-m-d H:i:s"), "Y-m-d H:i:s", $this->surveyOptions['timeadjust']));
-                            }
-                            else
-                            {
-                                $sQuery .= App()->db->quoteColumnName('submitdate') . "=" . App()->db->quoteValue(date("Y-m-d H:i:s",mktime(0,0,0,1,1,1980)));
-                            }
+//                            if($this->surveyOptions['datestamp'])
+//                            {
+//                                // Replace with date("Y-m-d H:i:s") ? See timeadjust
+//                                $sQuery .= App()->db->quoteColumnName('submitdate') . "=" . App()->db->quoteValue(dateShift(date("Y-m-d H:i:s"), "Y-m-d H:i:s", $this->surveyOptions['timeadjust']));
+//                            }
+//                            else
+//                            {
+//                                $sQuery .= App()->db->quoteColumnName('submitdate') . "=" . App()->db->quoteValue(date("Y-m-d H:i:s",mktime(0,0,0,1,1,1980)));
+//                            }
+                            // No matter whether the 'datestamp' is set or not, always display the last update time.
+                            $sQuery .= App()->db->quoteColumnName('submitdate') . "=" . App()->db->quoteValue(dateShift(date("Y-m-d H:i:s"), "Y-m-d H:i:s", $this->surveyOptions['timeadjust']));
                             $sQuery .= " WHERE ID=".$_SESSION[$this->sessid]['srid'];
                             Yii::app()->db->createCommand($sQuery)->query();
                             //dbExecuteAssoc($sQuery);   // Checked
