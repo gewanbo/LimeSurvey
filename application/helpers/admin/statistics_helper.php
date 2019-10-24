@@ -1426,6 +1426,33 @@ class statistics_helper
                     $qquestion = $qastring.$labelheader;
                     break;
 
+                case "+":    //list dependent dropdown
+
+                    $sSubquestionQuery = "SELECT  question, scale_id FROM {{questions}} WHERE parent_qid='$qiqid' AND title='$qanswer' AND language='{$language}' ORDER BY question_order";
+                    $questionDesc = Yii::app()->db->createCommand($sSubquestionQuery)->query()->read();
+
+                    $scale_id = $questionDesc['scale_id'];
+                    $sSubquestion = flattenText($questionDesc['question']);
+
+                    //get question attributes
+                    //$aQuestionAttributes = QuestionAttribute::model()->getQuestionAttributes($qqid);
+
+                    $labelheader = $sSubquestion;
+
+                    $fquery = "SELECT * FROM {{answers}} WHERE qid='{$qqid}' AND scale_id={$scale_id} AND language='{$language}' ORDER BY sortorder, code";
+
+                    //get data
+                    $fresult = Yii::app()->db->createCommand($fquery)->query();
+
+                    //put label code and label title into array
+                    foreach ($fresult->readAll() as $frow) {
+                        $alist[] = array($frow['code'], flattenText($frow['answer']));
+                    }
+
+                    //adapt title and question
+                    $qtitle = $qtitle." [".$sSubquestion."]";
+                    $qquestion = $qastring.$labelheader;
+                    break;
 
 
 

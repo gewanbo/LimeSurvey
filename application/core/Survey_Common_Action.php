@@ -266,6 +266,7 @@ class Survey_Common_Action extends CAction
         foreach ($aViewUrls as $sViewKey => $viewUrl) {
             if (empty($sViewKey) || !in_array($sViewKey, array('message', 'output'))) {
                 if (is_numeric($sViewKey)) {
+                    // Render File: /admin/responses/listResponses_view
                     $content .= Yii::app()->getController()->renderPartial($sViewPath.$viewUrl, $aData, true);
                 } elseif (is_array($viewUrl)) {
                     foreach ($viewUrl as $aSubData) {

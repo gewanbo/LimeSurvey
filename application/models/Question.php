@@ -710,6 +710,15 @@ class Question extends LSActiveRecord
                 'answerscales' => 1,
                 'class' => 'list-dropdown'
             ),
+            "+" => array(
+                'description' => gT("List (Dependent Dropdown)", "html", $language),
+                'group' => gT("Single choice questions"),
+                'subquestions' => 2,
+                'hasdefaultvalues' => 0,
+                'assessable' => 1,
+                'answerscales' => 2,
+                'class' => 'list-dropdown'
+            ),
             ":" => array(
                 'description' => gT("Array (Numbers)", "html", $language),
                 'group' => gT('Arrays'),
@@ -804,13 +813,14 @@ class Question extends LSActiveRecord
             case 'Y': return 'yes-no';
             case 'Z': return 'list-radio-flexible';
             case '!': return 'list-dropdown';
+            case '+': return 'list-dependent-dropdown';
             //case '^': return 'slider';          //  SLIDER CONTROL
             case ':': return 'array-multi-flexi';
             case ";": return 'array-multi-flexi-text';
             case "|": return 'upload-files';
             case "*": return 'equation';
             default:  return 'generic_question'; // fallback
-        };
+        }
     }
 
     /**
@@ -881,6 +891,31 @@ class Question extends LSActiveRecord
 
     }
 
+    public function getOrderedAnswerByScaleId($scale_id=0, $random = 0, $alpha = 0)
+    {
+        $criteria = (new CDbCriteria());
+        $criteria->addCondition('t.qid=:qid');
+        $criteria->addCondition('t.language=:language');
+        $criteria->addCondition('t.scale_id=:scale_id');
+        $criteria->params = [
+            ':qid' => $this->qid,
+            ':language' => $this->language,
+            ':scale_id' => $scale_id
+        ];
+
+        if ($random == 1){
+            $criteria->order = new CDbExpression(dbRandom());
+        } elseif ($alpha == 1){
+            $criteria->order = 'answer';
+        } else {
+            $criteria->order = 'sortorder, answer';
+        }
+
+        $ansresult = Answer::model()->findAll($criteria);
+        return $ansresult;
+
+    }
+
     /**
      * get subquestions fort the current question object in the right order
      * @param int $random
@@ -894,6 +929,36 @@ class Question extends LSActiveRecord
         $criteria->addCondition('t.scale_id=0');
         $criteria->addCondition('t.language=:language');
         $criteria->params = [':qid'=>$this->qid, ':language'=>$this->language];
+        $criteria->order = ($random == 1 ? (new CDbExpression(dbRandom())) : 'question_order ASC');
+        $ansresult = Question::model()->findAll($criteria);
+
+        //if  exclude_all_others is set then the related answer should keep its position at all times
+        //thats why we have to re-position it if it has been randomized
+        if (trim($exclude_all_others) != '' && $random == 1) {
+            $position = 0;
+            foreach ($ansresult as $answer) {
+                if (($answer['title'] == trim($exclude_all_others))) {
+                    if ($position == $answer['question_order'] - 1) {
+//already in the right position
+                        break;
+                    }
+                    $tmp = array_splice($ansresult, $position, 1);
+                    array_splice($ansresult, $answer['question_order'] - 1, 0, $tmp);
+                    break;
+                }
+                $position++;
+            }
+        }
+        return $ansresult;
+    }
+
+    public function getOrderedSubQuestionByScaleId($scale_id=0, $random = 0, $exclude_all_others = '')
+    {
+        $criteria = (new CDbCriteria());
+        $criteria->addCondition('t.parent_qid=:qid');
+        $criteria->addCondition('t.scale_id=:scale_id');
+        $criteria->addCondition('t.language=:language');
+        $criteria->params = [':qid'=>$this->qid, ':scale_id' => $scale_id, ':language'=>$this->language];
         $criteria->order = ($random == 1 ? (new CDbExpression(dbRandom())) : 'question_order ASC');
         $ansresult = Question::model()->findAll($criteria);
 
@@ -1110,6 +1175,10 @@ class Question extends LSActiveRecord
             return "{$this->sid}X{$this->gid}X{$this->parent_qid}";
         }
         return "{$this->sid}X{$this->gid}X{$this->qid}";
+    }
+
+    public function getFieldName(){
+        return $this->getBasicFieldName() . $this->title;
     }
 
     /**

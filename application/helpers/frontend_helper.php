@@ -271,7 +271,7 @@ function checkUploadedFileValidity($surveyid, $move, $backok = null)
 
 
     if (!isset($backok) || $backok != "Y") {
-        $fieldmap = createFieldMap($survey, 'full', false, false, $_SESSION['survey_'.$surveyid]['s_lang']);
+        $fieldmap = createFieldMap($survey, 'full', false, false, $_SESSION['survey_' . $surveyid]['s_lang']);
 
         if (isset($_POST['fieldnames']) && $_POST['fieldnames'] != "") {
             $fields = explode("|", $_POST['fieldnames']);
@@ -294,18 +294,18 @@ function checkUploadedFileValidity($surveyid, $move, $backok = null)
                         } else {
 // basic
                             for ($i = 1; $i <= $validation['max_num_of_files']; $i++) {
-                                if (!isset($_FILES[$field."_file_".$i]) || $_FILES[$field."_file_".$i]['name'] == '') {
-                                                                    continue;
+                                if (!isset($_FILES[$field . "_file_" . $i]) || $_FILES[$field . "_file_" . $i]['name'] == '') {
+                                    continue;
                                 }
 
                                 $filecount++;
 
-                                $file = $_FILES[$field."_file_".$i];
+                                $file = $_FILES[$field . "_file_" . $i];
 
                                 // File size validation
                                 if ($file['size'] > $validation['max_filesize'] * 1000) {
                                     $filenotvalidated = array();
-                                    $filenotvalidated[$field."_file_".$i] = sprintf(gT("Sorry, the uploaded file (%s) is larger than the allowed filesize of %s KB."), $file['size'], $validation['max_filesize']);
+                                    $filenotvalidated[$field . "_file_" . $i] = sprintf(gT("Sorry, the uploaded file (%s) is larger than the allowed filesize of %s KB."), $file['size'], $validation['max_filesize']);
                                     $append = true;
                                 }
 
@@ -316,17 +316,17 @@ function checkUploadedFileValidity($surveyid, $move, $backok = null)
                                 $validExtensions = explode(",", $validation['allowed_filetypes']);
                                 if (!(in_array($ext, $validExtensions))) {
                                     if (isset($append) && $append) {
-                                        $filenotvalidated[$field."_file_".$i] .= sprintf(gT("Sorry, only %s extensions are allowed!"), $validation['allowed_filetypes']);
+                                        $filenotvalidated[$field . "_file_" . $i] .= sprintf(gT("Sorry, only %s extensions are allowed!"), $validation['allowed_filetypes']);
                                         unset($append);
                                     } else {
                                         $filenotvalidated = array();
-                                        $filenotvalidated[$field."_file_".$i] .= sprintf(gT("Sorry, only %s extensions are allowed!"), $validation['allowed_filetypes']);
+                                        $filenotvalidated[$field . "_file_" . $i] .= sprintf(gT("Sorry, only %s extensions are allowed!"), $validation['allowed_filetypes']);
                                     }
                                 }
                             }
                         }
                     } else {
-                                            $filecount = 0;
+                        $filecount = 0;
                     }
 
                     if (isset($validation['min_num_of_files']) && $filecount < $validation['min_num_of_files'] && LimeExpressionManager::QuestionIsRelevant($fieldmap[$field]['qid'])) {
@@ -338,20 +338,20 @@ function checkUploadedFileValidity($surveyid, $move, $backok = null)
         }
         if (isset($filenotvalidated)) {
             if (isset($move) && $move == "moveprev") {
-                            $_SESSION['survey_'.$surveyid]['step'] = $thisstep;
+                $_SESSION['survey_' . $surveyid]['step'] = $thisstep;
             }
             if (isset($move) && $move == "movenext") {
-                            $_SESSION['survey_'.$surveyid]['step'] = $thisstep;
+                $_SESSION['survey_' . $surveyid]['step'] = $thisstep;
             }
             return $filenotvalidated;
         }
     }
     if (!isset($filenotvalidated)) {
-            return false;
+        return false;
     } else {
-            return $filenotvalidated;
+        return $filenotvalidated;
     }
-    }
+}
 
 /**
 * Takes two single element arrays and adds second to end of first if value exists

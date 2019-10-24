@@ -559,6 +559,7 @@ class QuestionTemplate extends CFormModel
             "X" => 'boilerplate',
             "Y" => 'yesno',
             "!" => 'list_dropdown',
+            "+" => 'list_dependent_dropdown',
             ":" => 'arrays/multiflexi',
             ";" => 'arrays/texts',
             "|" => 'file_upload',

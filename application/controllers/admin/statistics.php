@@ -719,6 +719,7 @@ class statistics extends Survey_Common_Action
                 case "E":
                 case "B":
                 case "C":
+                case "+":
                     //loop through all answers. if there are 3 items to rate there will be 3 statistics
                     $qid = $row['qid'];
                     $results = Question::model()->getQuestionsForStatistics('title, question', "parent_qid='$qid' AND language = '{$language}'", 'question_order');

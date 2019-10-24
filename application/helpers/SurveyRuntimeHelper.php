@@ -211,7 +211,7 @@ class SurveyRuntimeHelper
                     }
 
                     if ($ia[4] == "|") {
-                                        $upload_file = true;
+                        $upload_file = true;
                     }
                 } //end iteration
             }

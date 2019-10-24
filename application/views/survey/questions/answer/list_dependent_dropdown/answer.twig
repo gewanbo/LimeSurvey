@@ -1,0 +1,64 @@
+{#
+/**
+ * List DropDown select Html
+ *
+ * @var $sOptions         : the select options, generated with the view item_options.php
+ * @var $sOther           : the other input field, generated with the view item_noanswer.php
+ *
+ * @var $name
+ * @var $dropdownSize
+ * @var $checkconditionFunction
+ * @var $select_show_hide
+ *
+ */
+#}
+
+<!-- List Dropdown -->
+
+<!-- answer-->
+<div class="form-inline">
+    <div class="{{ coreClass }} form-group">
+        {{ leftHeader }}
+        <select
+                class="form-control list-question-select"
+                name="{{ nameA }}"
+                id="answer{{ nameA }}"
+                {% if dropdownSize %} size={{ dropdownSize }} {% endif %}
+                aria-labelledby="ls-question-text-{{ basename }}"
+        >
+                {# rows/option.php #}
+                {{ sAOptions }}
+        </select>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        {{ rightHeader }}
+        <select
+                class="form-control list-question-select"
+                name="{{ nameB }}"
+                id="answer{{ nameB }}"
+                {% if dropdownSize %} size={{ dropdownSize }} {% endif %}
+                aria-labelledby="ls-question-text-{{ basename }}"
+        >
+            {# rows/option.php #}
+            {{ sBOptions_default }}
+        </select>
+            {# rows/othertext.php #}
+            {{ sOther }}
+        <select id="all-options" style="display: none">
+            {{ sBOptions }}
+        </select>
+        <script>
+
+            $(document).on("change","#answer{{ nameA }}", function(){
+                var a_code = $(this).val() + "";
+                $("#answer{{ nameB }}").html('');
+                $('#all-options').find('option').each(function (index, elem) {
+                    var b_code = $(elem).val() + "";
+                    if(b_code == "" || (a_code !== "" && b_code.indexOf(a_code) === 0)){
+                        $("#answer{{ nameB }}").append(elem.outerHTML);
+                    }
+                })
+            });
+        </script>
+    </div>
+</div>
+<!-- end of answer  -->

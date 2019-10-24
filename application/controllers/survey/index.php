@@ -587,6 +587,7 @@ class index extends CAction
         Yii::import('application.helpers.SurveyRuntimeHelper');
         $tmp = new SurveyRuntimeHelper();
         // try {
+            // application/helpers/SurveyRuntimeHelper.php#run
             $tmp->run($surveyid, $redata);
         // } catch (WrongTemplateVersionException $ex) {
         //     echo $ex->getMessage();

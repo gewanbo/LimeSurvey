@@ -163,6 +163,10 @@ function retrieveAnswers($ia)
             $values = do_list_dropdown($ia);
             break;
 
+        case '+': //List - dependent dropdown
+            $values = do_list_dependent_dropdown($ia);
+            break;
+
         case 'O': //LIST WITH COMMENT drop-down/radio-button list + textarea
             $values = do_listwithcomment($ia);
             break;
@@ -1400,6 +1404,202 @@ function do_list_dropdown($ia)
         return_timer_script($aQuestionAttributes, $ia);
     }
     //End Time Limit Code
+
+    return array($answer, $inputnames);
+}
+
+// ---------------------------------------------------------------
+// TMSW TODO - Can remove DB query by passing in answer list from EM
+function do_list_dependent_dropdown($ia)
+{
+    $develop_mode = false;
+
+    //// Init variables
+    $inputnames = array();
+
+    // General variables
+    $checkconditionFunction = "checkconditions";
+
+    // Question attribute variables
+    $aQuestionAttributes = QuestionAttribute::model()->getQuestionAttributes($ia[0]);
+
+    if($develop_mode) {
+        echo "ia:";
+        var_dump($ia);
+        echo "survey:";
+        var_dump($_SESSION['survey_' . Yii::app()->getConfig('surveyID')]);
+    }
+
+    $iSurveyId              = Yii::app()->getConfig('surveyID'); // survey id
+    $sSurveyLang            = $_SESSION['survey_'.$iSurveyId]['s_lang']; // survey language
+    $othertext = '';
+    //$othertext              = (trim($aQuestionAttributes['other_replace_text'][$sSurveyLang]) != '') ? $aQuestionAttributes['other_replace_text'][$sSurveyLang] : gT('Other:'); // text for 'other'
+    $optCategorySeparator = '';
+    //$optCategorySeparator   = (trim($aQuestionAttributes['category_separator']) != '') ? $aQuestionAttributes['category_separator'] : '';
+    $coreClass              = "ls-answers answer-item dropdown-item";
+
+    if ($optCategorySeparator == '') {
+        unset($optCategorySeparator);
+    }
+
+    //// Retrieving datas
+
+    // Getting question
+    $oQuestion = Question::model()->findByPk(array('qid'=>$ia[0], 'language'=>$sSurveyLang));
+    $other     = $oQuestion->other;
+
+    // Getting answers
+    $subQuestionA = $oQuestion->getOrderedSubQuestionByScaleId(0);
+    $subQuestionB = $oQuestion->getOrderedSubQuestionByScaleId(1);
+
+    $ansresultA = $oQuestion->getOrderedAnswerByScaleId(0);
+    $ansresultB = $oQuestion->getOrderedAnswerByScaleId(1);
+
+    if($develop_mode) {
+        echo "Subquestions:";
+        var_dump($subQuestionA);
+        var_dump($subQuestionB);
+
+        echo "Answer A:";
+        var_dump($ansresultA);
+        echo "Answer B:";
+        var_dump($ansresultB);
+    }
+
+    $leftheader = '';
+    $rightheader = '';
+    $nameA = '';
+    $nameB = '';
+
+    if(count($subQuestionA) > 0){
+        if($subQuestionA[0] instanceof Question){
+            $leftheader = $subQuestionA[0]->question;
+            $nameA = $subQuestionA[0]->getFieldName();
+        }
+    }
+
+    if(count($subQuestionB) > 0){
+        if($subQuestionB[0] instanceof Question){
+            $rightheader = $subQuestionB[0]->question;
+            $nameB = $subQuestionB[0]->getFieldName();
+        }
+    }
+
+    $dropdownSize = null;
+
+    $_prefix = '';
+
+    //$value            = $_SESSION['survey_'.Yii::app()->getConfig('surveyID')][$ia[1]];
+    $sAOptions        = '';
+    $sBOptions        = '';
+
+    // If no answer previously selected
+//    if (is_null($_SESSION['survey_'.Yii::app()->getConfig('surveyID')][$ia[1]]) || $_SESSION['survey_'.Yii::app()->getConfig('surveyID')][$ia[1]] === '') {
+//        $sAOptions .= doRender('/survey/questions/answer/list_dependent_dropdown/rows/option', array(
+//            'name'=> $ia[1],
+//            'value'=>'',
+//            'opt_select'=> ($dropdownSize) ? SELECTED : "", /* needed width size, not for single first one */
+//            'answer'=>gT('Please choose...')
+//        ), true);
+//        $sBOptions .= doRender('/survey/questions/answer/list_dependent_dropdown/rows/option', array(
+//            'name'=> $ia[1],
+//            'value'=>'',
+//            'opt_select'=> ($dropdownSize) ? SELECTED : "", /* needed width size, not for single first one */
+//            'answer'=>gT('Please choose...')
+//        ), true);
+//        $sBOptions_default = doRender('/survey/questions/answer/list_dependent_dropdown/rows/option', array(
+//            'name'=> $ia[1],
+//            'value'=>'',
+//            'opt_select'=> ($dropdownSize) ? SELECTED : "", /* needed width size, not for single first one */
+//            'answer'=>gT('Please choose...')
+//        ), true);
+//    }
+
+    $sAOptions .= doRender('/survey/questions/answer/list_dependent_dropdown/rows/option', array(
+        'name'=> $ia[1],
+        'value'=>'',
+        'opt_select'=> ($dropdownSize) ? SELECTED : "", /* needed width size, not for single first one */
+        'answer'=>gT('Please choose...')
+    ), true);
+    $sBOptions .= doRender('/survey/questions/answer/list_dependent_dropdown/rows/option', array(
+        'name'=> $ia[1],
+        'value'=>'',
+        'opt_select'=> ($dropdownSize) ? SELECTED : "", /* needed width size, not for single first one */
+        'answer'=>gT('Please choose...')
+    ), true);
+    $sBOptions_default = doRender('/survey/questions/answer/list_dependent_dropdown/rows/option', array(
+        'name'=> $ia[1],
+        'value'=>'',
+        'opt_select'=> ($dropdownSize) ? SELECTED : "", /* needed width size, not for single first one */
+        'answer'=>gT('Please choose...')
+    ), true);
+
+
+    foreach ($ansresultA as $ansrow) {
+        $opt_select = '';
+//        if ($_SESSION['survey_'.Yii::app()->getConfig('surveyID')][$ia[1]] == $ansrow['code']) {
+//            $opt_select = SELECTED;
+//        }
+
+        // ==> rows
+        $sAOptions .= doRender('/survey/questions/answer/list_dependent_dropdown/rows/option', array(
+            'name'=> $ia[1],
+            'value'=>$ansrow['code'],
+            'opt_select'=>$opt_select,
+            'answer'=>$_prefix.$ansrow['answer'],
+        ), true);
+    }
+
+    foreach ($ansresultB as $ansrow) {
+        $opt_select = '';
+//        if ($_SESSION['survey_'.Yii::app()->getConfig('surveyID')][$ia[1]] == $ansrow['code']) {
+//            $opt_select = SELECTED;
+//        }
+
+        // ==> rows
+        $sBOptions .= doRender('/survey/questions/answer/list_dependent_dropdown/rows/option', array(
+            'name'=> $ia[1],
+            'value'=>$ansrow['code'],
+            'opt_select'=>$opt_select,
+            'answer'=>$_prefix.$ansrow['answer'],
+        ), true);
+    }
+
+    $sOther = '';
+    if (isset($other) && $other == 'Y') {
+        $aData = array();
+        $aData['name'] = $ia[1];
+        $aData['checkconditionFunction'] = $checkconditionFunction;
+        $aData['display'] = ($_SESSION['survey_'.Yii::app()->getConfig('surveyID')][$ia[1]] != '-oth-') ? 'display: none;' : '';
+        $aData['label'] = $othertext;
+        $thisfieldname = "$ia[1]other";
+        $aData['value'] = (isset($_SESSION['survey_'.Yii::app()->getConfig('surveyID')][$thisfieldname])) ?htmlspecialchars($_SESSION['survey_'.Yii::app()->getConfig('surveyID')][$thisfieldname], ENT_QUOTES) : '';
+
+        // ==> other
+        $sOther .= doRender('/survey/questions/answer/list_dropdown/rows/othertext', $aData, true);
+
+        $inputnames[] = $ia[1].'other';
+    }
+
+    // ==> answer
+    $answer = doRender('/survey/questions/answer/list_dependent_dropdown/answer', array(
+        'leftHeader'             => $leftheader,
+        'rightHeader'            => $rightheader,
+        'sAOptions'              => $sAOptions,
+        'sBOptions'              => $sBOptions,
+        'sBOptions_default'      => $sBOptions_default,
+        'sOther'                 => $sOther,
+        'nameA'                  => $nameA,
+        'nameB'                  => $nameB,
+        'basename'               => $ia[1],
+        'dropdownSize'           => $dropdownSize,
+        'checkconditionFunction' => $checkconditionFunction,
+        //'value'                  => $value,
+        'coreClass'              => $coreClass
+    ), true);
+
+    $inputnames[] = $nameA;
+    $inputnames[] = $nameB;
 
     return array($answer, $inputnames);
 }

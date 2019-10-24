@@ -415,7 +415,7 @@ class questionHelper
         );
 
         self::$attributes["statistics_showgraph"] = array(
-            'types'=>'15ABCDEFGHIKLMNOPQRSTUWXYZ!:;|*',
+            'types'=>'15ABCDEFGHIKLMNOPQRSTUWXYZ!+:;|*',
             'category'=>gT('Statistics'),
             'inputtype'=>'switch',
             'sortorder'=>101,
@@ -426,7 +426,7 @@ class questionHelper
         );
 
         self::$attributes["statistics_graphtype"] = array(
-            "types"=>'15ABCDEFGHIKLMNOQRSTUWXYZ!:;|*',
+            "types"=>'15ABCDEFGHIKLMNOQRSTUWXYZ!+:;|*',
             'category'=>gT('Statistics'),
             'inputtype'=>'singleselect',
             'sortorder'=>102,
@@ -512,7 +512,7 @@ class questionHelper
         // End Map Options
 
         self::$attributes["hide_tip"] = array(
-            "types"=>"15ABCDEFGHIKLMNOPQRSTUXY!:;|",
+            "types"=>"15ABCDEFGHIKLMNOPQRSTUXY!+:;|",
             'category'=>gT('Display'),
             'sortorder'=>100,
             'inputtype'=>'switch',
@@ -523,7 +523,7 @@ class questionHelper
         );
 
         self::$attributes['hidden'] = array(
-            'types'=>'15ABCDEFGHIKLMNOPQRSTUWXYZ!:;|*',
+            'types'=>'15ABCDEFGHIKLMNOPQRSTUWXYZ!+:;|*',
             'category'=>gT('Display'),
             'sortorder'=>101,
             'inputtype'=>'switch',
@@ -1200,7 +1200,7 @@ class questionHelper
         );
 
         self::$attributes["scale_export"] = array(
-            "types"=>"CEFGHLMOPWYZ1!:*",
+            "types"=>"CEFGHLMOPWYZ1!+:*",
             'category'=>gT('Other'),
             'sortorder'=>100,
             'inputtype'=>'singleselect',
