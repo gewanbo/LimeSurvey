@@ -25,7 +25,7 @@ App()->getClientScript()->registerScript("notification-panel-variables", "
         <div class="col-sm-12 col-md-6">
             <!-- Date Stamp -->
             <div class="form-group">
-                <label class=" control-label" for='datestamp'><?php  eT("Date stamp:"); ?></label>
+                <label class=" control-label" for='datestamp'><?php  eT("Date stamp:"); ?>(开启后会记录用户提交的开始、结束时间)</label>
                 <div class="">
                     <?php if ($oSurvey->isActive) { ?>
                         <?php if ($oSurvey->datestamp != "Y") {
