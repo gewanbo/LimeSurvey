@@ -117,6 +117,29 @@ App()->getClientScript()->registerScript("notification-panel-variables", "
                 </div>
             </div>
 
+            <!-- Save campaign code -->
+            <div class="form-group">
+                <label class=" control-label" for='campaign_code'><?php  eT("Save campaign code:"); ?></label>
+                <div class="">
+                    <?php if ($oSurvey->isActive) { ?>
+                        <?php  if ($oSurvey->campaign_code != "Y") {
+                            eT("Responses will not have their campaign code logged.");
+                        } else {
+                            eT("Responses will have their campaign code logged.");
+                        } ?>
+                        <span class='annotation'> <?php  eT("Cannot be changed"); ?></span>
+                        <?php echo CHtml::hiddenField('campaign_code',$oSurvey->campaign_code);?>
+                    <?php } else {
+                        $this->widget('yiiwheels.widgets.switch.WhSwitch', array(
+                            'name' => 'campaign_code',
+                            'value'=> $oSurvey->isCampaignCode,
+                            'onLabel'=>gT('On'),
+                            'offLabel'=>gT('Off')
+                        ));
+                    } ?>
+                </div>
+            </div>
+
             <!-- Save timings -->
             <div class="form-group">
                 <label class=" control-label" for='savetimings'><?php  eT("Save timings:"); ?></label>
