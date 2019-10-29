@@ -5459,6 +5459,10 @@
                     }
                 }
 
+                if (isset($_SESSION[$this->sessid]['ccode'])) {
+                    $sdata['ccode'] = $_SESSION[$this->sessid]['ccode'];
+                }
+
                 if (isset($_SESSION[$this->sessid]['startingValues']['seed'])) {
                     $sdata['seed'] = $_SESSION[$this->sessid]['startingValues']['seed'];
                 }
