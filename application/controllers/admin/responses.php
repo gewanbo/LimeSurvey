@@ -63,7 +63,7 @@ class responses extends Survey_Common_Action
         $aData['all'] = Yii::app()->request->getParam('all');
         $thissurvey = getSurveyInfo($iSurveyId);
         if (!$thissurvey) {
-// Already done in Survey_Common_Action
+            // Already done in Survey_Common_Action
             Yii::app()->session['flashmessage'] = gT("Invalid survey ID");
             $this->getController()->redirect(array("admin/index"));
         } elseif ($thissurvey['active'] != 'Y') {
@@ -86,6 +86,7 @@ class responses extends Survey_Common_Action
 
         $aData['qulanguage'] = Survey::model()->findByPk($iSurveyId)->language;
 
+        $aData['campaign_code'] = $thissurvey['campaign_code'];
         $aData['surveyoptions'] = '';
         $aData['browseoutput']  = '';
 
@@ -356,8 +357,36 @@ class responses extends Survey_Common_Action
             $aViewUrls[] = 'browseallfiltered_view';
         }
 
-        $aData['num_total_answers'] = SurveyDynamic::model($iSurveyID)->count();
-        $aData['num_completed_answers'] = SurveyDynamic::model($iSurveyID)->count('submitdate IS NOT NULL');
+        $aData['num_completed_answers'] = 0;
+        $aData['num_total_answers'] = 0;
+
+        if($survey['campaign_code'] == 'Y'){
+            $allData = SurveyDynamic::model($iSurveyID)->findAll();
+
+            $campaignGroup = [];
+            foreach ($allData as $item){
+
+                $campaignKey = $item['ccode'] == null ? 'null' : $item['ccode'];
+                if(!array_key_exists($campaignKey, $campaignGroup)){
+                    $campaignGroup[$campaignKey] = [];
+                    $campaignGroup[$campaignKey]['num_completed_answers'] = 0;
+                    $campaignGroup[$campaignKey]['num_total_answers'] = 0;
+                }
+
+                if($item['submitdate']) {
+                    $campaignGroup[$campaignKey]['num_completed_answers']++;
+                    $aData['num_completed_answers']++;
+                }
+
+                $campaignGroup[$campaignKey]['num_total_answers']++;
+                $aData['num_total_answers']++;
+            }
+            $aData['num_campaign_data'] = $campaignGroup;
+        } else {
+            $aData['num_total_answers'] = SurveyDynamic::model($iSurveyID)->count();
+            $aData['num_completed_answers'] = SurveyDynamic::model($iSurveyID)->count('submitdate IS NOT NULL');
+        }
+
         if ($survey->hasTokensTable && Permission::model()->hasSurveyPermission($iSurveyID, 'tokens', 'read')) {
             $aData['with_token'] = Yii::app()->db->schema->getTable($survey->tokensTableName);
             $aData['tokeninfo'] = Token::model($iSurveyID)->summary();
