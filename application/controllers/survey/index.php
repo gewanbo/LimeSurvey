@@ -497,6 +497,10 @@ class index extends CAction
             $_SESSION['survey_'.$surveyid]['refurl'] = getReferringUrl(); // do not overwrite refurl
         }
 
+        if (isset($param['ccode']) && !empty($param['ccode'])){
+            $_SESSION['survey_'.$surveyid]['ccode'] = $param['ccode'];
+        }
+
         // Let's do this only if
         //  - a saved answer record hasn't been loaded through the saved feature
         //  - the survey is not anonymous
@@ -610,7 +614,7 @@ class index extends CAction
         }
 
         // Need some $param (else PHP notice)
-        foreach (array('lang', 'action', 'newtest', 'qid', 'gid', 'sid', 'loadname', 'loadpass', 'scid', 'thisstep', 'move', 'token') as $sNeededParam) {
+        foreach (array('lang', 'action', 'newtest', 'qid', 'gid', 'sid', 'loadname', 'loadpass', 'scid', 'thisstep', 'move', 'token', 'ccode') as $sNeededParam) {
             $param[$sNeededParam] = returnGlobal($sNeededParam, true);
         }
 
