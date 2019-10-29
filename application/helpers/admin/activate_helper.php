@@ -365,6 +365,9 @@ function activateSurvey($iSurveyID, $simulate = false)
                                     $aTableDefinition[$aRow['fieldname']] = "text";
                 }
                 break;
+            case "ccode":
+                $aTableDefinition[$aRow['fieldname']] = "string(32)";
+                break;
             case "token":
                 $aTableDefinition[$aRow['fieldname']] = 'string(35)'.$sCollation;
                 break;
@@ -391,7 +394,7 @@ function activateSurvey($iSurveyID, $simulate = false)
                     $oQuestionAttribute->value = $nrOfAnswers;
                     $oQuestionAttribute->save();
                 } elseif (intval($oQuestionAttribute->value) < 1) {
-// Fix it if invalid : disallow 0, but need a sub question minimum for EM
+                    // Fix it if invalid : disallow 0, but need a sub question minimum for EM
                     $oQuestionAttribute->value = $nrOfAnswers;
                     $oQuestionAttribute->save();
                 }
