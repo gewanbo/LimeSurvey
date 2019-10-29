@@ -1517,6 +1517,16 @@ function createFieldMap($survey, $style = 'short', $force_refresh = false, $ques
         }
     }
 
+    // Add 'ccode' to fieldmap.
+    if ($prow['campaign_code'] == "Y") {
+        $fieldmap["ccode"] = array("fieldname"=>"ccode", 'type'=>"ccode", 'sid'=>$surveyid, "gid"=>"", "qid"=>"", "aid"=>"");
+        if ($style == "full") {
+            $fieldmap["ccode"]['title'] = "";
+            $fieldmap["ccode"]['question'] = gT("Campaign Code");
+            $fieldmap["ccode"]['group_name'] = "";
+        }
+    }
+
     $sOldLanguage = App()->language;
     App()->setLanguage($sLanguage);
     // Collect all default values once so don't need separate query for each question with defaults
