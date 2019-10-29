@@ -53,6 +53,7 @@ class database extends Survey_Common_Action
                 'datestamp' => ['type'=> 'yesno', 'default' => false, 'dbname'=>false, 'active'=>true, 'required'=>[]],
                 'ipaddr' => ['type'=> 'yesno', 'default' => false, 'dbname'=>false, 'active'=>true, 'required'=>[]],
                 'refurl' => ['type'=> 'yesno', 'default' => false, 'dbname'=>false, 'active'=>true, 'required'=>[]],
+                'campaign_code' => ['type'=> 'yesno', 'default' => false, 'dbname'=>false, 'active'=>true, 'required'=>[]],
                 'publicgraphs' => ['type'=> 'yesno', 'default' => false, 'dbname'=>false, 'active'=>true, 'required'=>[]],
                 'usecookie' => ['type'=> 'yesno', 'default' => false, 'dbname'=>false, 'active'=>true, 'required'=>[]],
                 'allowregister' => ['type'=> 'yesno', 'default' => false, 'dbname'=>false, 'active'=>true, 'required'=>[]],
@@ -941,6 +942,7 @@ class database extends Survey_Common_Action
                 $oSurvey->datestamp = $this->_filterEmptyFields($oSurvey, 'datestamp');
                 $oSurvey->ipaddr = $this->_filterEmptyFields($oSurvey, 'ipaddr');
                 $oSurvey->refurl = $this->_filterEmptyFields($oSurvey, 'refurl');
+                $oSurvey->campaign_code = $this->_filterEmptyFields($oSurvey, 'campaign_code');
             }
 
             $oSurvey->publicgraphs = $this->_filterEmptyFields($oSurvey, 'publicgraphs');
