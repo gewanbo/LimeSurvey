@@ -36,4 +36,23 @@ echo viewHelper::getViewTestTag('surveyResponsesIndex');
             </div>
         </div>
     <?php endif; ?>
+    <?php if($campaign_code == 'Y'): ?>
+        <?php $index = 0; $last_index = count($num_campaign_data) - 1; ?>
+        <?php foreach ($num_campaign_data as $campaign_code => $item):?>
+
+        <?php if($index % 2 == 0) echo '<div class="row">'; ?>
+            <div class="col-lg-6 <?php if($index % 2 == 0) echo 'content-left'; else echo 'content-right'; ?>">
+                <h3><?php eT("Survey summary by campaign: "); ?><b><?php echo $campaign_code;?></b></h3>
+                <table class='statisticssummary table'>
+                    <tbody>
+                    <tr><th><?php eT("Full responses"); ?></th><td><?php echo $item['num_completed_answers']; ?></td></tr>
+                    <tr><th><?php eT("Incomplete responses"); ?></th><td><?php echo ($item['num_total_answers'] - $item['num_completed_answers']); ?></td></tr>
+                    </tbody>
+                    <tr><th><?php eT("Total responses"); ?></th><td><?php echo $item['num_total_answers']; ?></td></tr>
+                </table>
+            </div>
+        <?php if($index % 2 !== 0 || $index == $last_index) echo '</div>'; ?>
+        <?php $index++; ?>
+        <?php endforeach; ?>
+    <?php endif; ?>
 </div>
