@@ -430,6 +430,7 @@ CREATE TABLE `prefix_surveys` (
   `printanswers` varchar(1) NOT NULL default 'N',
   `ipaddr` varchar(1) NOT NULL default 'N',
   `refurl` varchar(1) NOT NULL default 'N',
+  `campaign_code` varchar(1) NOT NULL default 'N',
   `datecreated` date default NULL,
   `publicstatistics` varchar(1) NOT NULL default 'N',
   `publicgraphs` varchar(1) NOT NULL default 'N',
