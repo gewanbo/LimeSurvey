@@ -47,6 +47,7 @@ use \LimeSurvey\PluginManager\PluginEvent;
  * @property string $printanswers Participants may print answers: (Y/N)
  * @property string $ipaddr Whether Participants IP address will be saved: (Y/N)
  * @property string $refurl Save referrer URL: (Y/N)
+ * @property string $campaign_code Save campaign code: (Y/N)
  * @property string $datecreated Date survey was created (YYYY-MM-DD hh:mm:ss)
  * @property string $publicstatistics Public statistics: (Y/N)
  * @property string $publicgraphs Show graphs in public statistics: (Y/N)
@@ -126,6 +127,7 @@ use \LimeSurvey\PluginManager\PluginEvent;
  * @property bool $isPrintAnswers Participants may print answers
  * @property bool $isIpAddr Whether Participants IP address will be saved
  * @property bool $isRefUrl Save referrer URL
+ * @property bool $isCampaignCode Save campaign code
  * @property bool $isPublicStatistics Public statistics
  * @property bool $isPublicGraphs Show graphs in public statistics
  * @property bool $isListPublic List survey publicly
@@ -455,6 +457,7 @@ class Survey extends LSActiveRecord
             array('printanswers', 'in', 'range'=>array('Y', 'N'), 'allowEmpty'=>true),
             array('ipaddr', 'in', 'range'=>array('Y', 'N'), 'allowEmpty'=>true),
             array('refurl', 'in', 'range'=>array('Y', 'N'), 'allowEmpty'=>true),
+            array('campaign_code', 'in', 'range'=>array('Y', 'N'), 'allowEmpty'=>true),
             array('publicstatistics', 'in', 'range'=>array('Y', 'N'), 'allowEmpty'=>true),
             array('publicgraphs', 'in', 'range'=>array('Y', 'N'), 'allowEmpty'=>true),
             array('listpublic', 'in', 'range'=>array('Y', 'N'), 'allowEmpty'=>true),
@@ -1284,6 +1287,13 @@ class Survey extends LSActiveRecord
     public function getIsRefUrl()
     {
         return ($this->refurl === 'Y');
+    }
+    /**
+     * @return bool
+     */
+    public function getIsCampaignCode()
+    {
+        return ($this->campaign_code === 'Y');
     }
     /**
      * @return bool
