@@ -567,6 +567,7 @@ class index extends CAction
         }
 
         // Preview action : Preview right already tested before
+        // $previewmode  is  group or question, never go to this if statement.
         if ($previewmode == 'previewgroup' || $previewmode == 'previewquestion') {
 
             // Unset all SESSION: be sure to have the last version
