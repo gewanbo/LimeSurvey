@@ -101,7 +101,7 @@ class database extends Survey_Common_Action
     /**
      * Database::index()
      *
-     * @return
+     * @return void
      */
     public function index()
     {
@@ -127,13 +127,16 @@ class database extends Survey_Common_Action
         if (in_array($sAction, array('insertquestion', 'copyquestion')) && Permission::model()->hasSurveyPermission($this->iSurveyID, 'surveycontent', 'create')) {
             $this->actionInsertCopyQuestion($this->iSurveyID);
         }
+        if ($sAction == "addResource" && Permission::model()->hasSurveyPermission($this->iSurveyID, 'surveycontent', 'create')) {
+            $this->actionAddResource($this->iSurveyID);
+        }
         if ($sAction == "updatequestion" && Permission::model()->hasSurveyPermission($this->iSurveyID, 'surveycontent', 'update')) {
             $this->actionUpdateQuestion($this->iSurveyID);
         }
-        if (($sAction == "updatesurveylocalesettings") && (Permission::model()->hasSurveyPermission($this->iSurveyID, 'surveylocale', 'update') || Permission::model()->hasSurveyPermission($iSurveyID, 'surveysettings', 'update'))) {
+        if (($sAction == "updatesurveylocalesettings") && (Permission::model()->hasSurveyPermission($this->iSurveyID, 'surveylocale', 'update') || Permission::model()->hasSurveyPermission($this->iSurveyID, 'surveysettings', 'update'))) {
             $this->actionUpdateSurveyLocaleSettings($this->iSurveyID);
         }
-        if (($sAction == "updatesurveylocalesettings_generalsettings") && (Permission::model()->hasSurveyPermission($this->iSurveyID, 'surveylocale', 'update') || Permission::model()->hasSurveyPermission($iSurveyID, 'surveysettings', 'update'))) {
+        if (($sAction == "updatesurveylocalesettings_generalsettings") && (Permission::model()->hasSurveyPermission($this->iSurveyID, 'surveylocale', 'update') || Permission::model()->hasSurveyPermission($this->iSurveyID, 'surveysettings', 'update'))) {
             $this->actionUpdateSurveyLocaleSettingsGeneralSettings($this->iSurveyID);
         }
 
@@ -1485,6 +1488,63 @@ class database extends Survey_Common_Action
         $redirectLink = $this->getController()->createUrl('admin/questions/sa/view/', array('surveyid' => $iSurveyID, 'gid' => $this->iQuestionGroupID, 'qid' => $this->iQuestionID));
         if (Yii::app()->request->getPost('saveandnew', '') != '') {
             $redirectLink = $this->getController()->createUrl('admin/questions/sa/newquestion/', array('surveyid' => $iSurveyID, 'gid' => $this->iQuestionGroupID));
+        }
+
+        $this->getController()->redirect($redirectLink);
+    }
+
+    private function actionAddResource($iSurveyID)
+    {
+        /** @var Survey $survey */
+        $survey = Survey::model()->findByPk($iSurveyID);
+        //$sBaseLanguage = $survey->language;
+
+        if (strlen(Yii::app()->request->getPost('file_name')) < 1) {
+            /* Already done in model : must control if return a good system or not here : BUT difficult to submit an empty string here */
+            Yii::app()->setFlashMessage(gT("The resource could not be added. You must enter at least a filename."), 'error');
+        } else {
+
+            $this->iResourceID = 0;
+
+            $oResource = new SurveyResource();
+            $oResource->survey_id = $iSurveyID;
+            $oResource->file_name = Yii::app()->request->getPost('file_name');
+            $oResource->file_type = 1;
+            $oResource->file_size = Yii::app()->request->getPost('file_size');
+            $oResource->image_width = Yii::app()->request->getPost('image_width');
+            $oResource->image_height = Yii::app()->request->getPost('image_height');
+            $oResource->frontend_link = Yii::app()->request->getPost('file_frontend_link');
+
+            $oResource->status = 1;
+
+            //$oQuestion->language = $sBaseLanguage;
+            $oResource->save();
+            if ($oResource) {
+                $this->iResourceID = $oResource->id;
+            }
+
+            $aErrors = $oResource->getErrors();
+            if (count($aErrors)) {
+                foreach ($aErrors as $sAttribute=>$aStringErrors) {
+                    foreach ($aStringErrors as $sStringErrors) {
+                        Yii::app()->setFlashMessage(sprintf(gT("Resource could not be created with error on %s: %s"), $sAttribute, $sStringErrors), 'error');
+                    }
+                }
+            }
+
+            if (!$this->iResourceID) {
+                Yii::app()->setFlashMessage(gT("Question could not be created."), 'error');
+
+            } else {
+                Yii::app()->session['flashmessage'] = gT("Resource was successfully added.");
+            }
+
+        }
+        //This is SUPER important! Recalculating the Expression Manager state!
+        LimeExpressionManager::SetDirtyFlag(); // so refreshes syntax highlighting
+        $redirectLink = $this->getController()->createUrl('admin/resources/sa/listresources/', array('surveyid' => $iSurveyID));
+        if (Yii::app()->request->getPost('saveandnew', '') != '') {
+            $redirectLink = $this->getController()->createUrl('admin/resources/sa/newResource/', array('surveyid' => $iSurveyID));
         }
 
         $this->getController()->redirect($redirectLink);
