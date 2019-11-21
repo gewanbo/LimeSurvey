@@ -64,6 +64,8 @@ $this->_showHeaders($aData, false);
                 $this->_listquestiongroups($aData);
                 //Rendered through /admin/survey/Question/listquestions
                 $this->_listquestions($aData);
+                //Rendered through /admin/survey/Question/listresources
+                $this->_listresources($aData);
                 //Rendered through /admin/super/sidebody
                 //With content of /admin/survey/surveySummary_view
                 $this->_nsurveysummary($aData);
