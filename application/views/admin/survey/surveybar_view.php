@@ -30,6 +30,15 @@
             ]
         ); ?>
 
+        <?php App()->getController()->renderPartial(
+            '/admin/survey/surveybar_resources',
+            [
+                'surveybar'      => $surveybar,
+                'oSurvey'        => $oSurvey,
+                'surveyHasGroup' => isset($surveyHasGroup) ? $surveyHasGroup : false
+            ]
+        ); ?>
+
         <!-- Left buttons for survey summary -->
         <?php if (isset($surveybar['buttons']['view'])):?>
 
