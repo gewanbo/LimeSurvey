@@ -22,6 +22,9 @@
 !.env-cmdrc
 
 
+# Nodejs modules
+/node_modules
+
 # upload directory : whole except the index.html and readme.txt
 /upload/*.*
 /upload/uploadsave/**/*.*
