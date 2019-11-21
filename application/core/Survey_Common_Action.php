@@ -110,6 +110,7 @@ class Survey_Common_Action extends CAction
             'sid' => array('iSurveyId', 'iSurveyID', 'surveyid'), // Old link use sid
             'surveyId' => array('iSurveyId', 'iSurveyID', 'surveyid'), // PluginHelper->sidebody : if disable surveyId usage : broke API
             'surveyid' => array('iSurveyId', 'iSurveyID', 'surveyid'),
+            'rid' => array('iResourceId', 'iResourceID', 'resourceid'),
             'srid' => 'iSurveyResponseId',
             'scid' => 'iSavedControlId',
             'uid' => 'iUserId',
@@ -978,6 +979,42 @@ class Survey_Common_Action extends CAction
             $aData['model'] = $model;
 
             $this->getController()->renderPartial("/admin/survey/Question/listquestions", $aData);
+        }
+    }
+
+    private function _listresources($aData)
+    {
+        if (isset($aData['display']['menu_bars']['listresources'])) {
+            $iSurveyID = $aData['surveyid'];
+            $oSurvey = $aData['oSurvey'];
+            $baselang = $oSurvey->language;
+
+            // The DataProvider will be build from the Question model, search method
+            //$model = new Question('search');
+            $model = new SurveyResource('search');
+
+            // Global filter
+            if (isset($_GET['Question'])) {
+                $model->setAttributes($_GET['Question'], false);
+            }
+
+            // Filter group
+            if (isset($_GET['gid'])) {
+                $model->gid = $_GET['gid'];
+            }
+
+            // Set number of page
+            if (isset($_GET['pageSize'])) {
+                Yii::app()->user->setState('pageSize', (int) $_GET['pageSize']);
+            }
+
+            // We filter the current survey id
+            $model->survey_id = $iSurveyID;
+            //$model->language = $baselang;
+
+            $aData['model'] = $model;
+
+            $this->getController()->renderPartial("/admin/survey/Resource/listresources", $aData);
         }
     }
 
