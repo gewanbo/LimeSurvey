@@ -38,6 +38,11 @@ class database extends Survey_Common_Action
      */
     private $iSurveyID;
 
+    /**
+     * @var integer Resource id
+     */
+    private $iResourceID;
+
 
     private $updateableFields = [
                 'owner_id' => ['type'=> '', 'default' => false, 'dbname'=>false, 'active'=>true, 'required'=>[]],
