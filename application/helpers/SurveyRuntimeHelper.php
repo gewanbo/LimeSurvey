@@ -182,9 +182,9 @@ class SurveyRuntimeHelper
 
                             // Add a finalgroup in qa array , needed for random attribute : TODO: find a way to have it in new quanda_helper in 2.1
                             if (isset($ia[10])) {
-                                                        $plus_qanda['finalgroup'] = $ia[10];
+                                $plus_qanda['finalgroup'] = $ia[10];
                             } else {
-                                                        $plus_qanda['finalgroup'] = $ia[5];
+                                $plus_qanda['finalgroup'] = $ia[5];
                             }
 
                             $qanda[] = $plus_qanda;
