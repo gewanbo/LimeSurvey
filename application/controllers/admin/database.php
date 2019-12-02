@@ -389,6 +389,7 @@ class database extends Survey_Common_Action
         $aCodes = array();
         $aOldCodes = array();
         $aRelevance = array();
+        $aFixedPosition = array();
         foreach ($_POST as $sPOSTKey=>$sPOSTValue) {
             $sPOSTKey = explode('_', $sPOSTKey);
             if ($sPOSTKey[0] == 'answer') {
@@ -403,7 +404,11 @@ class database extends Survey_Common_Action
             if ($sPOSTKey[0] == 'relevance') {
                 $aRelevance[$sPOSTKey[2]][] = $sPOSTValue;
             }
+            if ($sPOSTKey[0] == 'fixed') { // Fixed position
+                $aFixedPosition[$sPOSTKey[2]] = $sPOSTValue;
+            }
         }
+
         $aInsertQID = array();
         for ($iScaleID = 0; $iScaleID < $iScaleCount; $iScaleID++) {
             foreach ($aSurveyLanguages as $sLanguage) {
@@ -442,6 +447,7 @@ class database extends Survey_Common_Action
                         $oSubQuestion->question = $subquestionvalue;
                         $oSubQuestion->scale_id = $iScaleID;
                         $oSubQuestion->relevance = isset($aRelevance[$iScaleID][$iPosition]) ? $aRelevance[$iScaleID][$iPosition] : "";
+                        $oSubQuestion->fixed_position = isset($aFixedPosition[$subquestionkey]) && $aFixedPosition[$subquestionkey] == '1' ? 1 : 0;
                     } else {
 // new record
                         if (!isset($aInsertQID[$iScaleID][$iPosition])) {
