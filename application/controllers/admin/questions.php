@@ -731,16 +731,17 @@ class questions extends Survey_Common_Action
             // Check that there are subquestions for every language supported by the survey
             foreach ($anslangs as $language) {
                 foreach ($subquestiondata as $row) {
-                    $qrow = Question::model()->count('
-                    parent_qid = :qid AND
-                    language = :language AND
-                    qid = '.$row->qid.' AND
-                    scale_id = :iScale',
-                    array(
-                    ':qid' => $qid,
-                    ':language' => $language,
-                    ':iScale' => $iScale
-                    ));
+                    $qrow = Question::model()->count(
+                        'parent_qid = :qid AND
+                        language = :language AND
+                        qid = '.$row->qid.' AND
+                        scale_id = :iScale',
+                        array(
+                            ':qid' => $qid,
+                            ':language' => $language,
+                            ':iScale' => $iScale
+                        )
+                    );
 
                     // Means that no record for the language exists in the questions table
                     if (empty($qrow)) {
@@ -770,7 +771,7 @@ class questions extends Survey_Common_Action
         // Check sort order for subquestions
         $qresult = Question::model()->findByAttributes(array('qid' => $qid, 'language' => $oSurvey->language));
         if (!is_null($qresult)) {
-                    $qtype = $qresult->type;
+            $qtype = $qresult->type;
         }
 
         if (!empty($_POST['ansaction'])) {
@@ -782,7 +783,7 @@ class questions extends Survey_Common_Action
             ));
 
             if ($cacount) {
-                            Answer::model()->updateSortOrder($qid, Survey::model()->findByPk($surveyid)->language);
+                Answer::model()->updateSortOrder($qid, Survey::model()->findByPk($surveyid)->language);
             }
         }
 
