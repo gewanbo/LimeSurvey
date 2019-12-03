@@ -825,6 +825,18 @@ class questionHelper
             "caption"=>gT('Show in public statistics')
         );
 
+        // Developing, not finish yet.
+        self::$attributes["random_group_order"] = array(
+            "types"=>"M",
+            'category'=>gT('Display'),
+            'sortorder'=>99,
+            'inputtype'=>'singleselect',
+            'options'=>array(0=>gT('No'), 1=>gT("Yes")),
+            'default'=>0,
+            "help"=>gT('Present subquestions/answer group in random order'),
+            "caption"=>gT('Random group order')
+        );
+
         self::$attributes["random_order"] = array(
             "types"=>"!ABCEFHKLMOPQRWZ1:;",
             'category'=>gT('Display'),
