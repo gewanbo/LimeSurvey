@@ -1609,16 +1609,16 @@ class questionHelper
             self::$questionAttributesSettings[$sType] = array();
             self::getAttributesDefinitions(); /* we need to have self::$attributes */
             /* Filter to get this question type setting */
-            $aQuestionTypeAttributes = array_filter(self::$attributes, function($attribute) use ($sType) {
+            $aQuestionTypeAttributes = array_filter(self::$attributes, function ($attribute) use ($sType) {
                 return stripos($attribute['types'], $sType) !== false;
             });
-            foreach ($aQuestionTypeAttributes as $attribute=>$settings) {
-                  self::$questionAttributesSettings[$sType][$attribute] = array_merge(
-                      QuestionAttribute::getDefaultSettings(),
-                      array("category"=>gT("Plugins")),
-                      $settings,
-                      array("name"=>$attribute)
-                  );
+            foreach ($aQuestionTypeAttributes as $attribute => $settings) {
+                self::$questionAttributesSettings[$sType][$attribute] = array_merge(
+                    QuestionAttribute::getDefaultSettings(),
+                    array("category" => gT("Plugins")),
+                    $settings,
+                    array("name" => $attribute)
+                );
             }
         }
         return self::$questionAttributesSettings[$sType];
