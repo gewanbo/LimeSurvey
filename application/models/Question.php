@@ -29,7 +29,8 @@ if (!defined('BASEPATH')) {
  * @property string $help Question help-text for display
  * @property string $other Other option enabled for question (Y/N)
  * @property string $mandatory Whther question is mandatory (Y/N)
- * @property integer $question_order Question order in greoup
+ * @property integer $question_order Question order in group
+ * @property integer $fixed_position Fixed the question position in group
  * @property integer $parent_qid Questions parent question ID eg for subquestions
  * @property string $language Question language code. Note: Primary key is qid & language columns combined
  * @property integer $scale_id  The scale ID
@@ -929,26 +930,44 @@ class Question extends LSActiveRecord
         $criteria->addCondition('t.scale_id=0');
         $criteria->addCondition('t.language=:language');
         $criteria->params = [':qid'=>$this->qid, ':language'=>$this->language];
-        $criteria->order = ($random == 1 ? (new CDbExpression(dbRandom())) : 'question_order ASC');
+        $criteria->order = 'question_order ASC';
         $ansresult = Question::model()->findAll($criteria);
 
-        //if  exclude_all_others is set then the related answer should keep its position at all times
-        //thats why we have to re-position it if it has been randomized
-        if (trim($exclude_all_others) != '' && $random == 1) {
-            $position = 0;
-            foreach ($ansresult as $answer) {
-                if (($answer['title'] == trim($exclude_all_others))) {
-                    if ($position == $answer['question_order'] - 1) {
-//already in the right position
-                        break;
-                    }
-                    $tmp = array_splice($ansresult, $position, 1);
-                    array_splice($ansresult, $answer['question_order'] - 1, 0, $tmp);
-                    break;
+        if($random){
+            $random_list = [];
+            $fixed_list  = [];
+
+            $total_question_num = count($ansresult);
+            // arrange to two groups
+            foreach($ansresult as $question){
+                if($question['fixed_position'] == '1'){
+                    $fixed_list[] = $question;
+                } else {
+                    $random_list[] = $question;
                 }
-                $position++;
             }
+
+            $ansresult = null;
+
+            shuffle($random_list);
+
+            $resort_list = [];
+            $current_position = 1;
+            foreach($fixed_list as $question){
+                while($question['question_order'] - $current_position > 0){
+                    $resort_list[] = array_pop($random_list);
+                    $current_position++;
+                }
+                $resort_list[] = $question;
+            }
+            while ($total_question_num - $current_position > 0){
+                $resort_list[] = array_pop($random_list);
+                $current_position++;
+            }
+
+            $ansresult = &$resort_list;
         }
+
         return $ansresult;
     }
 
