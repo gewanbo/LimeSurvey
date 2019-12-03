@@ -1141,13 +1141,13 @@ class questions extends Survey_Common_Action
 
         $gid = sanitize_int($gid);
         if (isset($qid)) {
-                    $qid = sanitize_int($qid);
+            $qid = sanitize_int($qid);
         }
 
 
         $aViewUrls = array();
 
-        $oQuestionGroup = QuestionGroup::model()->find('gid=:gid', array(':gid'=>$gid));
+        $oQuestionGroup = QuestionGroup::model()->find('gid=:gid', array(':gid' => $gid));
         $aData = [];
         $aData['oQuestionGroup'] = $oQuestionGroup;
         $aData['surveyid'] = $surveyid;
@@ -1156,10 +1156,10 @@ class questions extends Survey_Common_Action
         $aData['display']['menu_bars']['surveysummary'] = 'viewgroup';
         $aData['display']['menu_bars']['gid_action'] = 'addquestion';
 
-        $aData['title_bar']['title'] = $oSurvey->currentLanguageSettings->surveyls_title." (".gT("ID").":".$iSurveyID.")";
+        $aData['title_bar']['title'] = $oSurvey->currentLanguageSettings->surveyls_title . " (" . gT("ID") . ":" . $iSurveyID . ")";
         $aData['questiongroupbar']['savebutton']['form'] = 'frmeditgroup';
         $aData['questiongroupbar']['saveandclosebutton']['form'] = 'frmeditgroup';
-        $aData['questiongroupbar']['closebutton']['url'] = 'admin/questions/sa/view/surveyid/'.$surveyid.'/gid/'.$gid.'/qid/'.$qid; // Close button
+        $aData['questiongroupbar']['closebutton']['url'] = 'admin/questions/sa/view/surveyid/' . $surveyid . '/gid/' . $gid . '/qid/' . $qid; // Close button
 
         Yii::app()->session['FileManagerContext'] = "create:question:{$surveyid}";
 
@@ -1191,14 +1191,14 @@ class questions extends Survey_Common_Action
                 Yii::app()->session['FileManagerContext'] = "edit:question:{$surveyid}";
                 $aData['display']['menu_bars']['qid_action'] = 'editquestion';
 
-                $oQuestion = Question::model()->find('qid=:qid', array(':qid'=>$qid));
+                $oQuestion = Question::model()->find('qid=:qid', array(':qid' => $qid));
                 $aData['oQuestion'] = $oQuestion;
 
                 $basesettings = [];
                 $egresult = Question::model()->findAllByAttributes(array('sid' => $surveyid, 'gid' => $gid, 'qid' => $qid));
                 foreach ($egresult as $esrow) {
                     if (!array_key_exists($esrow->language, $questlangs)) {
-                    // Language Exists, BUT ITS NOT ON THE SURVEY ANYMORE.
+                        // Language Exists, BUT ITS NOT ON THE SURVEY ANYMORE.
                         $esrow->delete();
                     } else {
                         $questlangs[$esrow->language] = 99;
@@ -1207,14 +1207,14 @@ class questions extends Survey_Common_Action
                     if ($esrow->language == $baselang) {
                         $esrow = $esrow->attributes;
                         $basesettings = array(
-                        'question_order' => $esrow['question_order'],
-                        'other' => $esrow['other'],
-                        'mandatory' => $esrow['mandatory'],
-                        'type' => $esrow['type'],
-                        'title' => $esrow['title'],
-                        'preg' => $esrow['preg'],
-                        'question' => $esrow['question'],
-                        'help' => $esrow['help']
+                            'question_order' => $esrow['question_order'],
+                            'other' => $esrow['other'],
+                            'mandatory' => $esrow['mandatory'],
+                            'type' => $esrow['type'],
+                            'title' => $esrow['title'],
+                            'preg' => $esrow['preg'],
+                            'question' => $esrow['question'],
+                            'help' => $esrow['help']
                         );
                     }
                 }
@@ -1223,7 +1223,7 @@ class questions extends Survey_Common_Action
                     $this->getController()->error('Invalid question id');
                 }
 
-                foreach ($questlangs as $key=>$value) {
+                foreach ($questlangs as $key => $value) {
                     if ($value != 99) {
                         $arQuestion = new Question;
                         $arQuestion->qid = $qid;
@@ -1258,14 +1258,14 @@ class questions extends Survey_Common_Action
             $eqrow = [];
             if (!$adding) {
                 if (is_object($eqresult->groups)) {
-                                    $eqrow = array_merge($eqresult->attributes, $eqresult->groups->attributes);
+                    $eqrow = array_merge($eqresult->attributes, $eqresult->groups->attributes);
                 } else {
-                                    $eqrow = $eqresult->attributes;
+                    $eqrow = $eqresult->attributes;
                 }
 
                 // Todo: handler in case that record is not found
                 if ($copying) {
-                                    $eqrow['title'] = '';
+                    $eqrow['title'] = '';
                 }
             } else {
                 $eqrow['language'] = $baselang;
@@ -1289,7 +1289,7 @@ class questions extends Survey_Common_Action
             $aData['surveyid'] = $surveyid;
             $aData['gid'] = $gid;
             $questionTemplateAttributes = Question::model()->getAdvancedSettingsWithValues($qid, $eqrow['type'], $surveyid);
-            if (!empty($questionTemplateAttributes['question_template'])){
+            if (!empty($questionTemplateAttributes['question_template'])) {
                 $aData['aQuestionTemplateAttributes'] = $questionTemplateAttributes['question_template'];
             } else {
                 $aData['aQuestionTemplateAttributes']['value'] = 'core';
@@ -1314,7 +1314,7 @@ class questions extends Survey_Common_Action
             }
 
             $aData['activated'] = $arSurveyInfo->active;
-            
+
             // Prepare selector Class for javascript function
             if (Yii::app()->session['questionselectormode'] !== 'default') {
                 $selectormodeclass = Yii::app()->session['questionselectormode'];
@@ -1329,31 +1329,31 @@ class questions extends Survey_Common_Action
              * Since is moved via ajax call only : it's not needed, when we have time : readd it for no-js solution
              */
             //~ if (!$adding)
-                //~ $qattributes = \LimeSurvey\Helpers\questionHelper::getQuestionAttributesSettings(($aqresult->type); //(or Question::getAdvancedSettingsWithValues )
+            //~ $qattributes = \LimeSurvey\Helpers\questionHelper::getQuestionAttributesSettings(($aqresult->type); //(or Question::getAdvancedSettingsWithValues )
             //~ else
-                //~ $qattributes = array();
+            //~ $qattributes = array();
 
             if ($adding) {
                 // Get the questions for this group
                 $baselang = $arSurveyInfo->language;
-                $oqresult = Question::model()->findAllByAttributes(array('sid' => $surveyid, 'gid' => $gid, 'language' => $baselang, 'parent_qid'=> 0), array('order' => 'question_order'));
+                $oqresult = Question::model()->findAllByAttributes(array('sid' => $surveyid, 'gid' => $gid, 'language' => $baselang, 'parent_qid' => 0), array('order' => 'question_order'));
                 $aData['oqresult'] = $oqresult;
             }
-            App()->getClientScript()->registerScriptFile(App()->getConfig('adminscripts').'questions.js', LSYii_ClientScript::POS_BEGIN);
+            App()->getClientScript()->registerScriptFile(App()->getConfig('adminscripts') . 'questions.js', LSYii_ClientScript::POS_BEGIN);
 
-            $aData['sValidateUrl'] = ($adding || $copying) ? $this->getController()->createUrl('admin/questions', array('sa' => 'ajaxValidate', 'surveyid'=>$surveyid)) : $this->getController()->createUrl('admin/questions', array('sa' => 'ajaxValidate', 'surveyid'=>$surveyid, 'qid'=>$qid));
+            $aData['sValidateUrl'] = ($adding || $copying) ? $this->getController()->createUrl('admin/questions', array('sa' => 'ajaxValidate', 'surveyid' => $surveyid)) : $this->getController()->createUrl('admin/questions', array('sa' => 'ajaxValidate', 'surveyid' => $surveyid, 'qid' => $qid));
             $aData['ajaxDatas']['sValidateUrl'] = $aData['sValidateUrl'];
             $aData['ajaxDatas']['qTypeOutput'] = $aData['qTypeOutput'];
-            
+
             $aData['addlanguages'] = Survey::model()->findByPk($surveyid)->additionalLanguages;
 
             $aViewUrls['editQuestion_view'][] = $aData;
-            App()->getClientScript()->registerScript("EditQuestionView_question_jsviews_".$surveyid.$gid.$qid, "OtherSelection('".$eqrow['type']."');", LSYii_ClientScript::POS_POSTSCRIPT);            
+            App()->getClientScript()->registerScript("EditQuestionView_question_jsviews_" . $surveyid . $gid . $qid, "OtherSelection('" . $eqrow['type'] . "');", LSYii_ClientScript::POS_POSTSCRIPT);
         } else {
-                    include('accessDenied.php');
+            include('accessDenied.php');
         }
 
-        
+
         $aData['ajaxDatas']['qTypeOutput'] = $aData['qTypeOutput'];
 
         ///////////
