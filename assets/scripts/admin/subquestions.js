@@ -37,7 +37,6 @@ $(document).on('ready  pjax:scriptcomplete', function(){
         distance:3});
         
     $('.btnaddanswer').on("click.subquestions", addinput);
-    $('.btnfixedposition').on("click.subquestions", fixedPosition);
     $('.btndelanswer').on("click.subquestions", deleteinput);
     $('#labelsetbrowserModal').on("shown.bs.modal.", lsbrowser );
     $('#labelsetbrowserModal').on("hidden.bs.modal.", lsbrowser_destruct );
@@ -320,27 +319,6 @@ function addinput(e)
             alert($errormessage);
         }
     });
-}
-
-/**
- * Fixed Position : Just updating on page, do not save to server until click save button.
- */
-
-function fixedPosition(e)
-{
-    e.preventDefault();
-    var $that                   = $(this),     // The "Fixed Position" button
-        currentFixedPosition    = $that.find('input.fixedposition'),
-        currentFixedPositionVal = $(currentFixedPosition).val();
-
-    if(currentFixedPositionVal == 1){
-        $(currentFixedPosition).val(0);
-        $that.removeClass('active');
-    } else {
-        $(currentFixedPosition).val(1);
-        $that.removeClass('active');
-        $that.addClass('active');
-    }
 }
 
 function startmove(event,ui)
