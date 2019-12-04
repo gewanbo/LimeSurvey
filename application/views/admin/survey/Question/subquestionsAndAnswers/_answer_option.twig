@@ -12,6 +12,7 @@
  * @var $language
  * @var $assessment_value
  * @var $sortorder
+ * @var $fixed_position
  * @var $answer
  *
  *
@@ -130,6 +131,10 @@
     <td style="vertical-align: middle;" class="subquestion-actions">
         {% if first %}
             <button type="button" class="btn btn-default btn-sm btnaddanswer"><i class="icon-add text-success " data-assessmentvisible='{{ assessmentvisible }}' data-position="{{ position }}" data-code="{{ title }}" data-scale-id="{{ scale_id }}" data-toggle="tooltip" data-placement="bottom" title="{{ gT("Add another record") }}"></i></button>
+            <button class="btn btn-default btn-sm btnfixedposition {% if fixed_position == '1' %}active{% endif %}">
+                <i class="icon-renumber text-success" data-code="{{ title }}" data-toggle="tooltip" data-scale-id="{{ scale_id }}" data-placement="bottom" title="{{ gT("Pin the subquestion at the fixed position") }}"></i>
+                <input type="hidden" class="fixedposition" name="fixed_position_{{ code }}" value="{{ fixed_position }}" />
+            </button>
             <button type="button" class="btn btn-default btn-sm btndelanswer"><i class="fa fa-trash text-danger " data-toggle="tooltip" data-placement="bottom"  title="{{ gT("Delete this entry") }}"></i></button>
         {% endif %}
     </td>
