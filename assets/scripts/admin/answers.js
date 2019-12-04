@@ -38,6 +38,7 @@ $(document).on('ready  pjax:scriptcomplete', function(){
 
 
     $('.btnaddanswer').on("click.answeroptions", debouncedAddInput);
+    $('.btnfixedposition').on("click.subquestions", fixedPosition);
     $('.btndelanswer').on("click.answeroptions", deleteinput);
     $('#labelsetbrowserModal').on("shown.bs.modal.", lsbrowser );
     $('#labelsetbrowserModal').on("hidden.bs.modal.", lsbrowser_destruct );
@@ -251,6 +252,26 @@ function addinput(e)
     });
 }
 
+/**
+ * Fixed Position : Just updating on page, do not save to server until click save button.
+ */
+
+function fixedPosition(e)
+{
+    e.preventDefault();
+    var $that                   = $(this),     // The "Fixed Position" button
+        currentFixedPosition    = $that.find('input.fixedposition'),
+        currentFixedPositionVal = $(currentFixedPosition).val();
+
+    if(currentFixedPositionVal == 1){
+        $(currentFixedPosition).val(0);
+        $that.removeClass('active');
+    } else {
+        $(currentFixedPosition).val(1);
+        $that.removeClass('active');
+        $that.addClass('active');
+    }
+}
 
 function aftermove(event,ui)
 {
@@ -369,7 +390,7 @@ function getNextCode(sSourceCode)
     {
         foundnumber++;
         foundnumber=foundnumber+'';
-        result=sourcecode.substr(0,sclength-foundnumber.length)+foundnumber;
+        var result=sourcecode.substr(0,sclength-foundnumber.length)+foundnumber;
         return(result);
     }
 
