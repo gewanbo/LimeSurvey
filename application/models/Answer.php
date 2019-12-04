@@ -20,6 +20,7 @@
  * @property string $code Answer code
  * @property string $answer Answer text
  * @property integer $sortorder Answer sort order
+ * @property integer $fixed_position Fixed the question position in group
  * @property integer $assessment_value
  * @property string $language Language code
  * @property integer $scale_id
