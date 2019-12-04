@@ -109,7 +109,7 @@
                                                     {{ gT("Answer options") }}
                                                 </th>
 
-                                                <th class='col-md-1'>
+                                                <th class='col-md-2'>
                                                     {% if first %}
                                                         {{ gT("Actions") }}
                                                     {% endif %}
@@ -134,7 +134,6 @@
                                                     'language'  : row.language,
                                                     'title'     : row.title,
                                                     'question'  : row.question,
-                                                    'fixed_position'  : row.fixed_position,
                                                     'relevance' : row.relevance,
                                                     'oldCode'   : true,
                                                 } %}
@@ -153,6 +152,8 @@
                                                     'assessment_value'  : row.assessment_value,
                                                     'sortorder'         : row.sortorder,
                                                     'answer'            : row.answer,
+                                                    'code'              : row.code,
+                                                    'fixed_position'    : row.fixed_position,
                                                     'oldCode'   : true,
                                                 } %}
 
