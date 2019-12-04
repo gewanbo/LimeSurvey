@@ -291,6 +291,7 @@ class database extends Survey_Common_Action
             $iMaxCount = (int) Yii::app()->request->getPost('answercount_'.$iScaleID);
             for ($iSortOrderID = 1; $iSortOrderID < $iMaxCount; $iSortOrderID++) {
                 $sCode = (string) sanitize_paranoid_string(Yii::app()->request->getPost('code_'.$iSortOrderID.'_'.$iScaleID));
+                $sFixedPosition = Yii::app()->request->getPost('fixed_position_' . $sCode);
                 $iAssessmentValue = (int) Yii::app()->request->getPost('assessment_'.$iSortOrderID.'_'.$iScaleID);
                 foreach ($survey->allLanguages as $sLanguage) {
                     $sAnswerText = Yii::app()->request->getPost('answer_'.$sLanguage.'_'.$iSortOrderID.'_'.$iScaleID);
@@ -304,6 +305,7 @@ class database extends Survey_Common_Action
                     $oAnswer->answer            = $sAnswerText;
                     $oAnswer->qid               = $this->iQuestionID;
                     $oAnswer->sortorder         = $iSortOrderID;
+                    $oAnswer->fixed_position    = $sFixedPosition;
                     $oAnswer->language          = $sLanguage;
                     $oAnswer->assessment_value  = $iAssessmentValue;
                     $oAnswer->scale_id          = $iScaleID;
@@ -376,7 +378,7 @@ class database extends Survey_Common_Action
         foreach ($aDeletedQIDs as $iDeletedQID) {
             $iDeletedQID = (int) $iDeletedQID;
             if ($iDeletedQID > 0) {
-// don't remove undefined
+                // don't remove undefined
                 $iInsertCount = Question::model()->deleteAllByAttributes(array('qid'=>$iDeletedQID));
                 if (!$iInsertCount) {
                     Yii::app()->setFlashMessage(gT("Failed to delete answer"), 'error');
@@ -404,9 +406,6 @@ class database extends Survey_Common_Action
             if ($sPOSTKey[0] == 'relevance') {
                 $aRelevance[$sPOSTKey[2]][] = $sPOSTValue;
             }
-            if ($sPOSTKey[0] == 'fixed') { // Fixed position
-                $aFixedPosition[$sPOSTKey[2]] = $sPOSTValue;
-            }
         }
 
         $aInsertQID = array();
@@ -433,9 +432,7 @@ class database extends Survey_Common_Action
 
                 foreach ($aRows[$iScaleID][$sLanguage] as $subquestionkey=>$subquestionvalue) {
                     if (substr($subquestionkey, 0, 3) != 'new') {
-//update record
-
-                        //
+                        //update record
 
                         $oSubQuestion = Question::model()->find("qid=:qid AND language=:language", array(":qid"=>$subquestionkey, ':language'=>$sLanguage));
                         if (!is_object($oSubQuestion)) {
@@ -447,11 +444,10 @@ class database extends Survey_Common_Action
                         $oSubQuestion->question = $subquestionvalue;
                         $oSubQuestion->scale_id = $iScaleID;
                         $oSubQuestion->relevance = isset($aRelevance[$iScaleID][$iPosition]) ? $aRelevance[$iScaleID][$iPosition] : "";
-                        $oSubQuestion->fixed_position = isset($aFixedPosition[$subquestionkey]) && $aFixedPosition[$subquestionkey] == '1' ? 1 : 0;
                     } else {
-// new record
+                        // new record
                         if (!isset($aInsertQID[$iScaleID][$iPosition])) {
-//new record: first (default) language
+                            //new record: first (default) language
                             $oSubQuestion = new Question;
                             $oSubQuestion->sid = $iSurveyID;
                             $oSubQuestion->gid = $this->iQuestionGroupID;
@@ -463,7 +459,7 @@ class database extends Survey_Common_Action
                             $oSubQuestion->scale_id = $iScaleID;
                             $oSubQuestion->relevance = isset($aRelevance[$iScaleID][$iPosition]) ? $aRelevance[$iScaleID][$iPosition] : "";
                         } else {
-//new record: additional language
+                            //new record: additional language
                             $oSubQuestion = Question::model()->find("qid=:qid AND language=:language", array(":qid"=>$aInsertQID[$iScaleID][$iPosition], ':language'=>$sLanguage));
                             if (!$oSubQuestion) {
                                 $oSubQuestion = new Question;
