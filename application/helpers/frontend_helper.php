@@ -277,7 +277,7 @@ function checkUploadedFileValidity($surveyid, $move, $backok = null)
             $fields = explode("|", $_POST['fieldnames']);
 
             foreach ($fields as $field) {
-                if ($fieldmap[$field]['type'] == "|" && !strrpos($fieldmap[$field]['fieldname'], "_filecount")) {
+                if (isset($fieldmap[$field]) && $fieldmap[$field]['type'] == "|" && !strrpos($fieldmap[$field]['fieldname'], "_filecount")) {
                     $validation = QuestionAttribute::model()->getQuestionAttributes($fieldmap[$field]['qid']);
 
                     $filecount = 0;
@@ -289,10 +289,10 @@ function checkUploadedFileValidity($surveyid, $move, $backok = null)
                     if ($json != "" && $json != "[]") {
                         $phparray = json_decode(urldecode($json));
                         if ($phparray[0]->size != "") {
-// ajax
+                            // ajax
                             $filecount = count($phparray);
                         } else {
-// basic
+                            // basic
                             for ($i = 1; $i <= $validation['max_num_of_files']; $i++) {
                                 if (!isset($_FILES[$field . "_file_" . $i]) || $_FILES[$field . "_file_" . $i]['name'] == '') {
                                     continue;
