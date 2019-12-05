@@ -30,7 +30,6 @@ if (!defined('BASEPATH')) {
  * @property string $other Other option enabled for question (Y/N)
  * @property string $mandatory Whther question is mandatory (Y/N)
  * @property integer $question_order Question order in group
- * @property integer $fixed_position Fixed the question position in group
  * @property integer $parent_qid Questions parent question ID eg for subquestions
  * @property string $language Question language code. Note: Primary key is qid & language columns combined
  * @property integer $scale_id  The scale ID
@@ -606,10 +605,10 @@ class Question extends LSActiveRecord
             "M" => array(
                 'description' => gT("Multiple choice", "html", $language),
                 'group' => gT("Multiple choice questions"),
-                'subquestions' => 1,
+                'subquestions' => 0,
                 'hasdefaultvalues' => 1,
                 'assessable' => 1,
-                'answerscales' => 0,
+                'answerscales' => 1,
                 'class' => 'multiple-opt'
             ),
             "N" => array(
@@ -872,13 +871,8 @@ class Question extends LSActiveRecord
 
     public function getOrderedAnswers($random = 0, $alpha = 0)
     {
-        //question attribute random order set?
-        if ($random == 1) {
-            $ansquery = "SELECT * FROM {{answers}} WHERE qid='$this->qid' AND language='$this->language' and scale_id=0 ORDER BY ".dbRandom();
-        }
-
         //question attribute alphasort set?
-        elseif ($alpha == 1) {
+        if ($alpha == 1) {
             $ansquery = "SELECT * FROM {{answers}} WHERE qid='$this->qid' AND language='$this->language' and scale_id=0 ORDER BY answer";
         }
 
@@ -888,6 +882,43 @@ class Question extends LSActiveRecord
         }
 
         $ansresult = dbExecuteAssoc($ansquery)->readAll();
+
+        if($random){
+            $random_list = [];
+            $fixed_list  = [];
+
+            $total_question_num = count($ansresult);
+            // arrange to two groups
+            foreach($ansresult as $question){
+                if($question['fixed_position'] == '1'){
+                    $fixed_list[] = $question;
+                } else {
+                    $random_list[] = $question;
+                }
+            }
+
+            $ansresult = null;
+
+            shuffle($random_list);
+
+            $resort_list = [];
+            $current_position = 1;
+            foreach($fixed_list as $question){
+                while($question['sortorder'] - $current_position > 0){
+                    $resort_list[] = array_pop($random_list);
+                    $current_position++;
+                }
+                $resort_list[] = $question;
+                $current_position++;
+            }
+            while ($total_question_num - $current_position >= 0){
+                $resort_list[] = array_pop($random_list);
+                $current_position++;
+            }
+
+            $ansresult = &$resort_list;
+        }
+
         return $ansresult;
 
     }
@@ -934,38 +965,7 @@ class Question extends LSActiveRecord
         $ansresult = Question::model()->findAll($criteria);
 
         if($random){
-            $random_list = [];
-            $fixed_list  = [];
-
-            $total_question_num = count($ansresult);
-            // arrange to two groups
-            foreach($ansresult as $question){
-                if($question['fixed_position'] == '1'){
-                    $fixed_list[] = $question;
-                } else {
-                    $random_list[] = $question;
-                }
-            }
-
-            $ansresult = null;
-
-            shuffle($random_list);
-
-            $resort_list = [];
-            $current_position = 1;
-            foreach($fixed_list as $question){
-                while($question['question_order'] - $current_position > 0){
-                    $resort_list[] = array_pop($random_list);
-                    $current_position++;
-                }
-                $resort_list[] = $question;
-            }
-            while ($total_question_num - $current_position > 0){
-                $resort_list[] = array_pop($random_list);
-                $current_position++;
-            }
-
-            $ansresult = &$resort_list;
+            shuffle($ansresult);
         }
 
         return $ansresult;
@@ -988,7 +988,7 @@ class Question extends LSActiveRecord
             foreach ($ansresult as $answer) {
                 if (($answer['title'] == trim($exclude_all_others))) {
                     if ($position == $answer['question_order'] - 1) {
-//already in the right position
+                        //already in the right position
                         break;
                     }
                     $tmp = array_splice($ansresult, $position, 1);
