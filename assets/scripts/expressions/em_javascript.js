@@ -842,6 +842,17 @@ function LEMval(alias)
                         shown = htmlentities(value);
                     break;
                 case 'M': //Multiple choice checkbox
+                    var answerKey = varName.split('_').pop();
+                    var which_ans = '0~' + answerKey;
+                    if (attr.answers === undefined || typeof attr.answers[which_ans] === 'undefined') {
+                        answer = value;
+                    } else {
+                        answerParts = attr.answers[which_ans].split('|');
+                        answerParts.shift();    // remove the first element
+                        answer = answerParts.join('|');
+                    }
+                    shown = answer;
+                    break;
                 case 'P': //Multiple choice with comments checkbox + text
                     if (typeof attr.question === 'undefined' || value == '') {
                         shown = '';
