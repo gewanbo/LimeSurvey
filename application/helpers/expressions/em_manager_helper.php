@@ -1162,7 +1162,7 @@
                             $afe_names = array();
                             switch ($type)
                             {
-                                case '1':   //Array (Flexible Labels) dual scale
+                                case '1': //Array (Flexible Labels) dual scale
                                 case ':': //ARRAY (Multi Flexi) 1 to 10
                                 case ';': //ARRAY (Multi Flexi) Text
                                 case 'A': //ARRAY (5 POINT CHOICE) radio-buttons
@@ -3801,6 +3801,7 @@
                 {
                     case '!': //List - dropdown
                     case 'L': //LIST drop-down/radio-button list
+                    case 'M': //Multiple choice checkbox
                     case 'O': //LIST WITH COMMENT drop-down/radio-button list + textarea
                     case '1': //Array (Flexible Labels) dual scale  // need scale
                     case 'H': //ARRAY (Flexible) - Column Format
@@ -3839,7 +3840,7 @@
                     case 'S': //SHORT FREE TEXT
                     case 'T': //LONG FREE TEXT
                     case 'U': //HUGE FREE TEXT
-                    case 'M': //Multiple choice checkbox
+                    //case 'M': //Multiple choice checkbox
                     case 'P': //Multiple choice with comments checkbox + text
                     case 'D': //DATE
                     case '*': //Equation
@@ -3890,6 +3891,7 @@
                     case 'I': //Language Question
                     case 'L': //LIST drop-down/radio-button list
                     case 'N': //NUMERICAL QUESTION TYPE
+                    case 'M': //Multiple choice checkbox
                     case 'O': //LIST WITH COMMENT drop-down/radio-button list + textarea
                     case 'S': //SHORT FREE TEXT
                     case 'T': //LONG FREE TEXT
@@ -3920,7 +3922,7 @@
                     case 'E': //ARRAY (Increase/Same/Decrease) radio-buttons
                     case 'F': //ARRAY (Flexible) - Row Format
                     case 'K': //MULTIPLE NUMERICAL QUESTION         // note does not have javatbd equivalent - so array filters don't work on it, but need rowdivid to process validations
-                    case 'M': //Multiple choice checkbox
+                    //case 'M': //Multiple choice checkbox
                     case 'P': //Multiple choice with comments checkbox + text
                     case 'Q': //MULTIPLE SHORT TEXT                 // note does not have javatbd equivalent - so array filters don't work on it
                     case 'R': //RANKING STYLE                       // note does not have javatbd equivalent - so array filters don't work on it
@@ -4094,7 +4096,7 @@
                 if($hidden && $type!="*"){
                     $jsVarName_on = '';
                 }
-                if (!is_null($rowdivid) || $type == 'L' || $type == 'N' || $type == '!' || $type == 'O'  || !is_null($preg)
+                if (!is_null($rowdivid) || in_array($type, ['L', 'M']) || $type == 'N' || $type == '!' || $type == 'O'  || !is_null($preg)
                 || $type == 'S' || $type == 'D' || $type == 'T' || $type == 'U' || $type == '|') {
                     if (!isset($q2subqInfo[$questionNum])) {
                         $q2subqInfo[$questionNum] = array(
