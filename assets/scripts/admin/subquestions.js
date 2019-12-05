@@ -439,7 +439,7 @@ function getNextCode(sSourceCode)
     {
         foundnumber++;
         foundnumber=foundnumber+'';
-        result=sourcecode.substr(0,sclength-foundnumber.length)+foundnumber;
+        var result=sourcecode.substr(0,sclength-foundnumber.length)+foundnumber;
         return(result);
     }
 }
@@ -665,7 +665,7 @@ function transferlabels(type)
                     var randId = 'new'+Math.floor(Math.random()*10000);
 
                     $tr.attr('data-common-id', $tr.attr('data-common-id').replace(/new[0-9]{3,6}/,randId));
-                    $tr.attr('id', $tr.attr('id').replace(/new[0-9]{3-5}/,randId));
+                    $tr.attr('id', $tr.attr('id').replace(/new[0-9]{3,5}/,randId));
 
                     $row.find('input').each(function(j,inputField){
                         $(inputField).attr('name', $(inputField).attr('name').replace(/new[0-9]{3,6}/,randId));
