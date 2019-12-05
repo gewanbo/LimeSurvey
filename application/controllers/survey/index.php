@@ -271,7 +271,7 @@ class index extends CAction
                     $aUrl,
                     $aErrors
             );
-        };
+        }
 
         //CHECK FOR REQUIRED INFORMATION (sid)
         if ($surveyid && $surveyExists) {
