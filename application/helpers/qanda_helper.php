@@ -2151,7 +2151,8 @@ function do_multiplechoice($ia)
     $other     = $oQuestion->other;
 
     // Getting answers
-    $ansresult = $oQuestion->getOrderedSubQuestions($aQuestionAttributes['random_order'], $aQuestionAttributes['exclude_all_others']);
+    //$ansresult = $oQuestion->getOrderedSubQuestions($aQuestionAttributes['random_order'], $aQuestionAttributes['exclude_all_others']);
+    $ansresult = $oQuestion->getOrderedAnswers($aQuestionAttributes['random_order']);
     $anscount  = count($ansresult);
     $anscount  = ($other == 'Y') ? $anscount + 1 : $anscount; //COUNT OTHER AS AN ANSWER FOR MANDATORY CHECKING!
 
@@ -2168,19 +2169,20 @@ function do_multiplechoice($ia)
 
     $aRows = [];
     foreach ($ansresult as $ansrow) {
-        $myfname = $ia[1].$ansrow['title'];
+        $questionKey = $ia[1];
+        $myfname = $ia[1].$ansrow['code'];
 
         $relevanceClass = currentRelevecanceClass($iSurveyId, $ia[1], $myfname, $aQuestionAttributes);
         $checkedState = '';
         /* If the question has already been ticked, check the checkbox */
-        if (isset($_SESSION['survey_'.Yii::app()->getConfig('surveyID')][$myfname])) {
-            if ($_SESSION['survey_'.Yii::app()->getConfig('surveyID')][$myfname] == 'Y') {
+        if (isset($_SESSION['survey_'.$iSurveyId][$questionKey])) {
+            if ($_SESSION['survey_'.$iSurveyId][$questionKey] == $ansrow['code']) {
                 $checkedState = 'CHECKED';
             }
         }
 
         $sCheckconditionFunction = $checkconditionFunction.'(this.value, this.name, this.type)';
-        $sValue                  = (isset($_SESSION['survey_'.Yii::app()->getConfig('surveyID')][$myfname])) ? $_SESSION['survey_'.Yii::app()->getConfig('surveyID')][$myfname] : '';
+        $sValue                  = (isset($_SESSION['survey_'.$iSurveyId][$myfname])) ? $_SESSION['survey_'.$iSurveyId][$myfname] : '';
         $inputnames[]            = $myfname;
 
 
@@ -2189,15 +2191,15 @@ function do_multiplechoice($ia)
         // Display the answer row
         $aRows[] = array(
             'name'                    => $ia[1], // field name
-            'title'                   => $ansrow['title'],
-            'question'                => $ansrow['question'],
+            'title'                   => $ansrow['code'],
+            'question'                => $ansrow['answer'],
             'ansrow'                  => $ansrow,
             'checkedState'            => $checkedState,
             'sCheckconditionFunction' => $sCheckconditionFunction,
             'myfname'                 => $myfname,
             'sValue'                  => $sValue,
             'relevanceClass'          => $relevanceClass,
-            );
+        );
     }
 
     //==>  rows
@@ -2249,8 +2251,6 @@ function do_multiplechoice($ia)
             'other'                      => true
             );
     }
-
-  
 
     // ==> answer
     $answer = doRender('/survey/questions/answer/multiplechoice/answer', array(
