@@ -3422,9 +3422,12 @@ function getAnswers($sid, $qid, $sLanguage)
     static $subquestions;
 
     if (!isset($subquestions[$sid])) {
-        $subquestions[$sid] = array();
+        $subquestions[$sid] = [];
+        if(!isset($subquestions[$sid][$sLanguage]))
+            $subquestions[$sid][$sLanguage] = [];
     }
-    if (!isset($subquestions[$sid][$sLanguage])) {
+
+    if (!isset($subquestions[$sid][$sLanguage][$qid])) {
 
         $query = "SELECT * FROM {{answers}} as a"
             ." WHERE a.qid=".$qid
