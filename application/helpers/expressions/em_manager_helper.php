@@ -3611,6 +3611,10 @@
         */
         public function setVariableAndTokenMappingsForExpressionManager($surveyid,$forceRefresh=false,$anonymized=false)
         {
+            // @todo This method was called many times
+//            var_dump('---------------------');
+//            var_dump(func_get_args());
+
             if (isset($_SESSION['LEMforceRefresh'])) {
                 unset($_SESSION['LEMforceRefresh']);
                 $forceRefresh=true;
@@ -6281,11 +6285,14 @@
                     $answersCount = \Answer::model()->count('qid = :qid and language = :language',array(':qid'=>$qid,':language'=>$language));
 
                     /** @var integer Get number of answers currently filtered (unrelevant) **/
-                    $answersFilteredCount =  count(array_filter($LEM->subQrelInfo[$qid],
-                        function ($sqRankAnwsers) {
-                            return !$sqRankAnwsers['result'];
-                        }
-                    ));
+                    $answersFilteredCount = 0;
+                    if(isset($LEM->subQrelInfo[$qid])) {
+                        $answersFilteredCount = count(array_filter($LEM->subQrelInfo[$qid],
+                            function ($sqRankAnwsers) {
+                                return !$sqRankAnwsers['result'];
+                            }
+                        ));
+                    }
                     /** var integer the answers available **/
                     $iCountRelevant = $answersCount - $answersFilteredCount;
                     // No need to control if upper than max_columns : count on $sgqa and count($sgqa) == max_columns
