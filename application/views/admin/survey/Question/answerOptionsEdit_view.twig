@@ -105,8 +105,12 @@
                                                     </th>
                                                 {% endif %}
 
-                                                <th class='col-md-8'>
+                                                <th >
                                                     {{ gT("Answer options") }}
+                                                </th>
+
+                                                <th id='rel-eq-th' class='col-md-1'>
+                                                    {{ gT("Relevance equation") }}
                                                 </th>
 
                                                 <th class='col-md-2'>
@@ -154,6 +158,7 @@
                                                     'answer'            : row.answer,
                                                     'code'              : row.code,
                                                     'fixed_position'    : row.fixed_position,
+                                                    'relevance'         : row.relevance,
                                                     'oldCode'   : true,
                                                 } %}
 
