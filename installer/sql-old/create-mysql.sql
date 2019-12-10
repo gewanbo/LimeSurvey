@@ -500,6 +500,28 @@ CREATE TABLE `prefix_surveys_languagesettings` (
 ) ENGINE = MYISAM CHARACTER SET utf8mb4 ;
 
 --
+-- Table structure for table surveys_resources
+--
+CREATE TABLE `prefix_survey_resources` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `survey_id` int(11) unsigned NOT NULL,
+  `file_name` varchar(200) NOT NULL DEFAULT '',
+  `file_type` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `file_size` int(11) unsigned NOT NULL DEFAULT '0',
+  `frontend_link` varchar(500) NOT NULL DEFAULT '',
+  `desc` varchar(200) NOT NULL DEFAULT '',
+  `thumb_link` varchar(500) NOT NULL DEFAULT '',
+  `image_width` int(6) unsigned NOT NULL DEFAULT '0',
+  `image_height` int(6) unsigned NOT NULL DEFAULT '0',
+  `status` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `create_ts` int(11) unsigned NOT NULL DEFAULT '0',
+  `update_ts` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `survey_id` (`survey_id`)
+) ENGINE = MYISAM CHARACTER SET utf8mb4;
+
+
+--
 -- Table structure for table user_groups
 --
 CREATE TABLE `prefix_user_groups` (
