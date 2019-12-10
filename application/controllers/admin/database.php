@@ -293,6 +293,7 @@ class database extends Survey_Common_Action
                 $sCode = (string) sanitize_paranoid_string(Yii::app()->request->getPost('code_'.$iSortOrderID.'_'.$iScaleID));
                 $sFixedPosition = Yii::app()->request->getPost('fixed_position_' . $sCode);
                 $iAssessmentValue = (int) Yii::app()->request->getPost('assessment_'.$iSortOrderID.'_'.$iScaleID);
+                $iRelevance = Yii::app()->request->getPost('relevance_'.$iSortOrderID.'_'.$iScaleID);
                 foreach ($survey->allLanguages as $sLanguage) {
                     $sAnswerText = Yii::app()->request->getPost('answer_'.$sLanguage.'_'.$iSortOrderID.'_'.$iScaleID);
 
@@ -309,6 +310,7 @@ class database extends Survey_Common_Action
                     $oAnswer->language          = $sLanguage;
                     $oAnswer->assessment_value  = $iAssessmentValue;
                     $oAnswer->scale_id          = $iScaleID;
+                    $oAnswer->relevance         = $iRelevance;
 
                     if (!$oAnswer->save()) {
                         $sErrors = '<br/>';
