@@ -1664,7 +1664,7 @@ class ExpressionManager
     /**
      * Process multiple substitution iterations of a full string, containing multiple expressions delimited by {}, return a consolidated string
      * @param string $src
-     * @param int $questionNum
+     * @param int $questionId
      * @param int $numRecursionLevels - number of levels of recursive substitution to perform
      * @param int $whichPrettyPrintIteration - if recursing, specify which pretty-print iteration is desired
      * @param int $groupSeq - needed to determine whether using variables before they are declared
@@ -1672,7 +1672,7 @@ class ExpressionManager
      * @param boolean $staticReplacement
      * @return string
      */
-    public function sProcessStringContainingExpressions($src, $questionNum = 0, $numRecursionLevels = 1, $whichPrettyPrintIteration = 1, $groupSeq = -1, $questionSeq = -1, $staticReplacement = false)
+    public function sProcessStringContainingExpressions($src, $questionId = 0, $numRecursionLevels = 1, $whichPrettyPrintIteration = 1, $groupSeq = -1, $questionSeq = -1, $staticReplacement = false)
     {
         // tokenize string by the {} pattern, properly dealing with strings in quotations, and escaped curly brace values
         $this->allVarsUsed = array();
@@ -1685,7 +1685,7 @@ class ExpressionManager
         for ($i = 1; $i <= $numRecursionLevels; ++$i) {
             // TODO - Since want to use <span> for dynamic substitution, what if there are recursive substititons?
             $prevResult = $result;
-            $result = $this->sProcessStringContainingExpressionsHelper($result, $questionNum, $staticReplacement);
+            $result = $this->sProcessStringContainingExpressionsHelper($result, $questionId, $staticReplacement);
             if($result === $prevResult) {
                 // No update during process : can exit of iteration
                 if(!$prettyPrintIterationDone) {
@@ -1713,12 +1713,28 @@ class ExpressionManager
      */
     public function sProcessStringContainingExpressionsHelper($src, $questionNum, $staticReplacement = false)
     {
+
+
         // tokenize string by the {} pattern, properly dealing with strings in quotations, and escaped curly brace values
+        /**
+          [5]=>
+            array(3) {
+            [0]=>
+            string(13) "{Q1_A3.shown}"
+            [1]=>
+            int(1922)
+            [2]=>
+            string(10) "EXPRESSION"
+          }
+         */
         $stringParts = $this->asSplitStringOnExpressions($src);
+
         $resolvedParts = array();
         $prettyPrintParts = array();
         foreach ($stringParts as $stringPart) {
-            if ($stringPart[2] == 'STRING') {
+            // Probably value is STRING or EXPRESSION
+            $stringPartType = $stringPart[2];
+            if ($stringPartType == 'STRING') {
                 $resolvedParts[] = $stringPart[0];
                 $prettyPrintParts[] = $stringPart[0];
             } else {
