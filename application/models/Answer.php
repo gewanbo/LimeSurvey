@@ -24,6 +24,7 @@
  * @property integer $assessment_value
  * @property string $language Language code
  * @property integer $scale_id
+ * @property string $relevance
  *
  * @property Question $questions
  * @property Question $groups
@@ -91,6 +92,7 @@ class Answer extends LSActiveRecord
             array('sortorder', 'numerical', 'integerOnly'=>true, 'allowEmpty'=>true),
             array('assessment_value', 'numerical', 'integerOnly'=>true, 'allowEmpty'=>true),
             array('scale_id', 'numerical', 'integerOnly'=>true, 'allowEmpty'=>true),
+            array('relevance', 'safe'),
         );
     }
 
