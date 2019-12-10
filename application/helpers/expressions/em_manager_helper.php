@@ -4482,7 +4482,7 @@
          /**
         * Translate all Expressions, Macros, registered variables, etc. in $string
         * @param string $string - the string to be replaced
-        * @param integer $questionNum - the $qid of question being replaced - needed for properly alignment of question-level relevance and tailoring
+        * @param integer $questionId - the $qid of question being replaced - needed for properly alignment of question-level relevance and tailoring
         * @param array|null $replacementFields - optional replacement values
         * @param integer $numRecursionLevels - the number of times to recursively subtitute values in this string
         * @param integer $whichPrettyPrintIteration - if want to pretty-print the source string, which recursion  level should be pretty-printed
@@ -4491,7 +4491,7 @@
         * @param boolean $staticReplacement - return HTML string without the system to update by javascript
         * @return string - the original $string with all replacements done.
         */
-        public static function ProcessString($string, $questionNum=NULL, $replacementFields=array(), $numRecursionLevels=1, $whichPrettyPrintIteration=1, $noReplacements=false, $timeit=true, $staticReplacement=false)
+        public static function ProcessString($string, $questionId=NULL, $replacementFields=array(), $numRecursionLevels=1, $whichPrettyPrintIteration=1, $noReplacements=false, $timeit=true, $staticReplacement=false)
         {
             $now = microtime(true);
             $LEM =& LimeExpressionManager::singleton();
@@ -4516,13 +4516,13 @@
             }
             $questionSeq = -1;
             $groupSeq = -1;
-            if (!is_null($questionNum)) {
-                $questionSeq = isset($LEM->questionId2questionSeq[$questionNum]) ? $LEM->questionId2questionSeq[$questionNum] : -1;
-                $groupSeq = isset($LEM->questionId2groupSeq[$questionNum]) ? $LEM->questionId2groupSeq[$questionNum] : -1;
+            if (!is_null($questionId)) {
+                $questionSeq = isset($LEM->questionId2questionSeq[$questionId]) ? $LEM->questionId2questionSeq[$questionId] : -1;
+                $groupSeq = isset($LEM->questionId2groupSeq[$questionId]) ? $LEM->questionId2groupSeq[$questionId] : -1;
             }
             $stringToParse = $string;   // decode called later htmlspecialchars_decode($string,ENT_QUOTES);
-            $qnum = is_null($questionNum) ? 0 : $questionNum;
-            $result = $LEM->em->sProcessStringContainingExpressions($stringToParse,$qnum, $numRecursionLevels, $whichPrettyPrintIteration, $groupSeq, $questionSeq, $staticReplacement);
+            $qid = is_null($questionId) ? 0 : $questionId;
+            $result = $LEM->em->sProcessStringContainingExpressions($stringToParse,$qid, $numRecursionLevels, $whichPrettyPrintIteration, $groupSeq, $questionSeq, $staticReplacement);
 
             if ($timeit) {
                 $LEM->runtimeTimings[] = array(__METHOD__,(microtime(true) - $now));
@@ -9078,8 +9078,7 @@ report~numKids > 0~message~{name}, you said you are {age} and that you have {num
                 case 'NAOK':
                     if (isset($var['code'])) {
                         return $var['code'];    // for static values like TOKEN
-                    }
-                    else {
+                    } else {
                         if (isset($_SESSION[$this->sessid][$sgqa])) {
                             $type = $var['type'];
                             switch($type)
@@ -9264,6 +9263,13 @@ report~numKids > 0~message~{name}, you said you are {age} and that you have {num
                                 $shown = $code;
                                 break;
                             case 'M': //Multiple choice checkbox
+                                $ansArray = $var['ansArray'];
+                                if (is_null($ansArray)) {
+                                    $shown = $code;
+                                } else {
+                                    $shown = $var['subqtext'];
+                                }
+                                break;
                             case 'P': //Multiple choice with comments checkbox + text
                                 // We need question too for other !empty test Y or anything for other. see #13505
                                 if (!empty($code) && isset($var['question']) && !preg_match('/comment$/',$sgqa)) {
