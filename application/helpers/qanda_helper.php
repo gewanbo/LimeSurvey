@@ -1610,6 +1610,8 @@ function do_list_dependent_dropdown($ia)
 function do_list_radio($ia)
 {
     //// Init variables
+    $qid = $ia[0];
+    $question_mandatory = $ia[6];
 
     // General variables
     global $thissurvey;
@@ -1621,21 +1623,21 @@ function do_list_radio($ia)
     $coreClass = "ls-answers answers-list radio-list";
     // Question attribute variables
 
-    $aQuestionAttributes = QuestionAttribute::model()->getQuestionAttributes($ia[0]);
+    $aQuestionAttributes = QuestionAttribute::model()->getQuestionAttributes($qid);
     $othertext           = (trim($aQuestionAttributes['other_replace_text'][$sSurveyLang]) != '') ? $aQuestionAttributes['other_replace_text'][$sSurveyLang] : gT('Other:'); // text for 'other'
     $iNbCols             = (trim($aQuestionAttributes['display_columns']) != '') ? $aQuestionAttributes['display_columns'] : 1; // number of columns
     $sTimer              = (trim($aQuestionAttributes['time_limit']) != '') ?return_timer_script($aQuestionAttributes, $ia) : ''; //Time Limit
     //// Retrieving datas
 
     // Getting question
-    $oQuestion = Question::model()->findByPk(array('qid'=>$ia[0], 'language'=>$sSurveyLang));
+    $oQuestion = Question::model()->findByPk(array('qid'=>$qid, 'language'=>$sSurveyLang));
     $other     = $oQuestion->other;
 
     // Getting answers
     $ansresult = $oQuestion->getOrderedAnswers($aQuestionAttributes['random_order'], $aQuestionAttributes['alphasort']);
     $anscount  = count($ansresult);
     $anscount  = ($other == 'Y') ? $anscount + 1 : $anscount; //COUNT OTHER AS AN ANSWER FOR MANDATORY CHECKING!
-    $anscount  = ($ia[6] != 'Y' && SHOW_NO_ANSWER == 1) ? $anscount + 1 : $anscount; //Count up if "No answer" is showing
+    $anscount  = ($question_mandatory != 'Y' && SHOW_NO_ANSWER == 1) ? $anscount + 1 : $anscount; //Count up if "No answer" is showing
 
     //// Columns containing answer rows, set by user in question attribute
     /// TODO : move to a dedicated function
@@ -3701,6 +3703,7 @@ function do_gender($ia)
 function do_array_5point($ia)
 {
     global $thissurvey;
+    $iSurveyId              = Yii::app()->getConfig('surveyID'); // survey id
     $aLastMoveResult         = LimeExpressionManager::GetLastMoveResult();
     $aMandatoryViolationSubQ = ($aLastMoveResult['mandViolation'] && $ia[6] == 'Y') ? explode("|", $aLastMoveResult['unansweredSQs']) : array();
     $coreClass               = "ls-answers subquestion-list questions-list radio-array";
@@ -3724,9 +3727,9 @@ function do_array_5point($ia)
     }
 
     if ($aQuestionAttributes['random_order'] == 1) {
-        $ansquery = "SELECT * FROM {{questions}} WHERE parent_qid=$ia[0] AND language='".$_SESSION['survey_'.Yii::app()->getConfig('surveyID')]['s_lang']."' ORDER BY ".dbRandom();
+        $ansquery = "SELECT * FROM {{questions}} WHERE parent_qid=$ia[0] AND language='".$_SESSION['survey_'. $iSurveyId]['s_lang']."' ORDER BY ".dbRandom();
     } else {
-        $ansquery = "SELECT * FROM {{questions}} WHERE parent_qid=$ia[0] AND language='".$_SESSION['survey_'.Yii::app()->getConfig('surveyID')]['s_lang']."' ORDER BY question_order";
+        $ansquery = "SELECT * FROM {{questions}} WHERE parent_qid=$ia[0] AND language='".$_SESSION['survey_'. $iSurveyId]['s_lang']."' ORDER BY question_order";
     }
 
     $ansresult     = dbExecuteAssoc($ansquery); //Checked
