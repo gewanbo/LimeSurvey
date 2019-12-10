@@ -145,6 +145,26 @@ class SurveyRuntimeHelper
             $upload_file = false;
             if (isset($_SESSION[$this->LEMsessid]['fieldarray'])) {
                 foreach ($_SESSION[$this->LEMsessid]['fieldarray'] as $key => $ia) {
+
+                    /**
+                     * $ia  structure
+                     *
+                     * [
+                     *      0   =>  qid
+                     *      1   =>  SGQ
+                     *      2   =>  title : Q1, Q2, Q3 ...
+                     *      3   =>  question  : Description of question
+                     *      4   =>  type    : M, L ...
+                     *      5   =>  gid
+                     *      6   =>  mandatory
+                     *      7   =>  has_conditions
+                     *      8   =>  used_inconditions
+                     *      9   =>  question count
+                     *      10  =>  random_gid
+                     * ]
+                     *
+                     */
+
                     ++$qnumber;
                     $ia[9] = $qnumber; // incremental question count;
 
@@ -374,12 +394,12 @@ class SurveyRuntimeHelper
                     }
 
                     // easier to understand for survey maker
-                    $aGroup['aQuestions'][$qid]['qid']                  = $qa[4];
+                    $aGroup['aQuestions'][$qid]['qid']                  = $qid;
                     $aGroup['aQuestions'][$qid]['gid']                  = $qinfo['info']['gid'];
                     $aGroup['aQuestions'][$qid]['code']                 = $qa[5];
                     $aGroup['aQuestions'][$qid]['type']                 = $qinfo['info']['type'];
                     $aGroup['aQuestions'][$qid]['number']               = $qa[0]['number'];
-                    $aGroup['aQuestions'][$qid]['text']                 = LimeExpressionManager::ProcessString($qa[0]['text'], $qa[4], $aStandardsReplacementFields, 3, 1, false, true, false);
+                    $aGroup['aQuestions'][$qid]['text']                 = LimeExpressionManager::ProcessString($qa[0]['text'], $qid, $aStandardsReplacementFields, 3, 1, false, true, false);
                     $aGroup['aQuestions'][$qid]['SGQ']                  = $qa[7];
                     $aGroup['aQuestions'][$qid]['mandatory']            = $qa[0]['mandatory'];
                     $aGroup['aQuestions'][$qid]['class']                = $this->getCurrentQuestionClasses($qid);
@@ -387,9 +407,9 @@ class SurveyRuntimeHelper
                     $aGroup['aQuestions'][$qid]['valid_message']        = LimeExpressionManager::ProcessString( $qa[0]['valid_message'] );
                     $aGroup['aQuestions'][$qid]['file_valid_message']   = $qa[0]['file_valid_message'];
                     $aGroup['aQuestions'][$qid]['man_message']          = $qa[0]['man_message'];
-                    $aGroup['aQuestions'][$qid]['answer']               = LimeExpressionManager::ProcessString($qa[1], $qa[4], null, 3, 1, false, true, false);
+                    $aGroup['aQuestions'][$qid]['answer']               = LimeExpressionManager::ProcessString($qa[1], $qid, null, 3, 1, false, true, false);
                     $aGroup['aQuestions'][$qid]['help']['show']         = (flattenText($lemQuestionInfo['info']['help'], true, true) != '');
-                    $aGroup['aQuestions'][$qid]['help']['text']         = LimeExpressionManager::ProcessString($lemQuestionInfo['info']['help'], $qa[4], null, 3, 1, false, true, false);
+                    $aGroup['aQuestions'][$qid]['help']['text']         = LimeExpressionManager::ProcessString($lemQuestionInfo['info']['help'], $qid, null, 3, 1, false, true, false);
                     $aGroup['aQuestions'][$qid] = $this->doBeforeQuestionRenderEvent($aGroup['aQuestions'][$qid]);
                 }
                 $aGroup['show_last_group']   = $aGroup['show_last_answer']  = false;
