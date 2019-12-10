@@ -458,13 +458,12 @@ class questiongroups extends Survey_Common_Action
                                 $oQuestion->question_order = $aQuestion['question_order'];
                                 $oQuestion->gid = $aQuestion['gid'];
                                 if(safecount($oQuestion->subquestions) > 0) {
-                                    array_walk(
-                                        $oQuestion->subquestions,
-                                        function ($oSubQuestion) use ($aQuestion, $success) {
+                                    foreach($oQuestion->subquestions as $oSubQuestion){
+                                        if($oSubQuestion->gid != $aQuestion['gid']){
                                             $oSubQuestion->gid = $aQuestion['gid'];
                                             $success = $success && $oSubQuestion->save(true);
                                         }
-                                    );
+                                    }
                                 }
                                 $success = $success && $oQuestion->save(true);
                             }
@@ -493,7 +492,7 @@ class questiongroups extends Survey_Common_Action
                 'data' => [
                     'success' => false,
                     'message' => gT("You can't reorder in an active survey"),
-                    'DEBUG' => ['POST'=>$_POST, 'grouparray' => $grouparray]
+                    'DEBUG' => ['POST'=>$_POST, 'grouparray' => []]
                 ],
             ),
             false,
