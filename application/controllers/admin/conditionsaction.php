@@ -1531,7 +1531,7 @@ protected function getCAnswersAndCQuestions(array $theserows)
             }
             unset($quicky);
             // End if type R
-        } elseif ($rows['type'] == "M" || $rows['type'] == "P") {
+        } elseif ($rows['type'] == "P") {
             
             $shortanswer = " [".gT("Group of checkboxes")."]";
             $shortquestion = $rows['title'].":$shortanswer ".strip_tags($rows['question']);
