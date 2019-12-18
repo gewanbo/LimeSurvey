@@ -2099,7 +2099,7 @@ function createFieldMap($survey, $style = 'short', $force_refresh = false, $ques
         }
 
         if (isset($fieldmap[$fieldname]['typename'])) {
-                    $fieldmap[$fieldname]['typename'] = $typename[$fieldname] = $arow['typename'];
+            $fieldmap[$fieldname]['typename'] = $typename[$fieldname] = $arow['typename'];
         }
     }
     App()->setLanguage($sOldLanguage);
