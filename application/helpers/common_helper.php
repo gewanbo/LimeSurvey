@@ -1633,6 +1633,64 @@ function createFieldMap($survey, $style = 'short', $force_refresh = false, $ques
             }
             switch ($arow['type']) {
                 case "L":  //RADIO LIST
+                    $answers = getAnswers($surveyid, $arow['qid'], $sLanguage);
+
+                    if ($arow['other'] == "Y") {
+                        $fieldname = "{$arow['sid']}X{$arow['gid']}X{$arow['qid']}other";
+                        if (isset($fieldmap[$fieldname])) {
+                            $aDuplicateQIDs[$arow['qid']] = array('fieldname' => $fieldname, 'question' => $arow['question'], 'gid' => $arow['gid']);
+                        }
+
+                        $fieldmap[$fieldname] = array("fieldname" => $fieldname,
+                            'type' => $arow['type'],
+                            'sid' => $surveyid,
+                            "gid" => $arow['gid'],
+                            "qid" => $arow['qid'],
+                            "aid" => "other");
+                        // dgk bug fix line above. aid should be set to "other" for export to append to the field name in the header line.
+                        if ($style == "full") {
+                            $fieldmap[$fieldname]['title'] = $arow['title'];
+                            $fieldmap[$fieldname]['question'] = $arow['question'];
+                            $fieldmap[$fieldname]['subquestion'] = gT("Other");
+                            $fieldmap[$fieldname]['group_name'] = $arow['group_name'];
+                            $fieldmap[$fieldname]['mandatory'] = $arow['mandatory'];
+                            $fieldmap[$fieldname]['hasconditions'] = $conditions;
+                            $fieldmap[$fieldname]['usedinconditions'] = $usedinconditions;
+                            $fieldmap[$fieldname]['questionSeq'] = $questionSeq;
+                            $fieldmap[$fieldname]['groupSeq'] = $groupSeq;
+                            if (isset($defaultValues[$arow['qid'] . '~other'])) {
+                                $fieldmap[$fieldname]['defaultvalue'] = $defaultValues[$arow['qid'] . '~other'];
+                            }
+                        }
+                    } else {
+                        foreach ($answers as $answer) {
+                            $fieldname = "{$arow['sid']}X{$arow['gid']}X{$arow['qid']}{$answer['code']}";
+                            if (isset($fieldmap[$fieldname])) {
+                                $aDuplicateQIDs[$arow['qid']] = array('fieldname' => $fieldname, 'question' => $arow['question'], 'gid' => $arow['gid']);
+                            }
+                            $fieldmap[$fieldname] = array("fieldname" => $fieldname,
+                                'type' => $arow['type'],
+                                'sid' => $surveyid,
+                                "gid" => $arow['gid'],
+                                "qid" => $arow['qid'],
+                                "aid" => $answer['code'],
+                                "sqid" => $answer['qid']);
+                            if ($style == "full") {
+                                $fieldmap[$fieldname]['title'] = $arow['title'];
+                                $fieldmap[$fieldname]['question'] = $arow['question'];
+                                $fieldmap[$fieldname]['group_name'] = $arow['group_name'];
+                                $fieldmap[$fieldname]['mandatory'] = $arow['mandatory'];
+                                $fieldmap[$fieldname]['hasconditions'] = $conditions;
+                                $fieldmap[$fieldname]['usedinconditions'] = $usedinconditions;
+                                $fieldmap[$fieldname]['questionSeq'] = $questionSeq;
+                                $fieldmap[$fieldname]['groupSeq'] = $groupSeq;
+                                $fieldmap[$fieldname]['preg'] = $arow['preg'];
+                                $fieldmap[$fieldname]['SQrelevance'] = $answer['relevance'];
+                            }
+
+                        }
+                    }
+                    break;
                 case "!":  //DROPDOWN LIST
                     if ($arow['other'] == "Y") {
                         $fieldname = "{$arow['sid']}X{$arow['gid']}X{$arow['qid']}other";
