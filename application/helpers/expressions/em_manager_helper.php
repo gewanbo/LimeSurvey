@@ -1079,7 +1079,7 @@
         */
         public function _CreateSubQLevelRelevanceAndValidationEqns($onlyThisQseq=NULL)
         {
-            //        $now = microtime(true);
+            //  $now = microtime(true);
             $this->subQrelInfo=array();  // reset it each time this is called
             $subQrels = array();    // array of subquestion-level relevance equations
             $validationEqn = array();
@@ -1336,7 +1336,7 @@
 
                 // individual subquestion relevance
                 if ($hasSubqs &&
-                    $type!='|' && $type!='!' && $type !='L' && $type !='O'
+                    $type!='|' && $type!='!' && $type !='O'
                 )
                 {
                     $subqs = $qinfo['subqs'];
@@ -3455,22 +3455,21 @@
             // Consolidate logic across array filters
             $rowdivids = array();
             $order=0;
-            foreach ($subQrels as $sq)
-            {
+            foreach ($subQrels as $sq) {
                 $oldeqn = (isset($rowdivids[$sq['rowdivid']]['eqns']) ? $rowdivids[$sq['rowdivid']]['eqns'] : array());
                 $oldtype = (isset($rowdivids[$sq['rowdivid']]['type']) ? $rowdivids[$sq['rowdivid']]['type'] : '');
                 $neweqn = (($sq['type'] == 'exclude_all_others') ? array() : array($sq['eqn']));
                 $oldeo = (isset($rowdivids[$sq['rowdivid']]['exclusive_options']) ? $rowdivids[$sq['rowdivid']]['exclusive_options'] : array());
                 $neweo = (($sq['type'] == 'exclude_all_others') ? array($sq['eqn']) : array());
                 $rowdivids[$sq['rowdivid']] = array(
-                'order'=>$order++,
-                'qid'=>$sq['qid'],
-                'rowdivid'=>$sq['rowdivid'],
-                'type'=>$sq['type'] . ';' . $oldtype,
-                'qtype'=>$sq['qtype'],
-                'sgqa'=>$sq['sgqa'],
-                'eqns'=>array_merge($oldeqn, $neweqn),
-                'exclusive_options'=>array_merge($oldeo, $neweo),
+                    'order' => $order++,
+                    'qid' => $sq['qid'],
+                    'rowdivid' => $sq['rowdivid'],
+                    'type' => $sq['type'] . ';' . $oldtype,
+                    'qtype' => $sq['qtype'],
+                    'sgqa' => $sq['sgqa'],
+                    'eqns' => array_merge($oldeqn, $neweqn),
+                    'exclusive_options' => array_merge($oldeo, $neweo),
                 );
             }
 
@@ -3630,7 +3629,7 @@
                 Yii::log('setVariableAndTokenMappingsForExpressionManager with an empty surveyOptions.','error','application.LimeExpressionManager');
             }
             // TODO - do I need to force refresh, or trust that createFieldMap will cache langauges properly?
-            $fieldmap=createFieldMap($survey,$style='full',$forceRefresh,false,$_SESSION['LEMlang']);
+            $fieldmap=createFieldMap($survey,$style='full',$forceRefresh,false,$_SESSION['LEMlang']);//var_dump($fieldmap);exit;
             $this->sid= $surveyid;
             $this->sessid = 'survey_' . $this->sid;
             $this->runtimeTimings[] = array(__METHOD__ . '.createFieldMap',(microtime(true) - $now));
@@ -3909,6 +3908,8 @@
                         $varName = $fielddata['title'];
                         if ($fielddata['aid'] != '') {
                             $varName .= '_' . $fielddata['aid'];
+                            $csuffix = $fielddata['aid'];
+                            $sqsuffix = '_' . $fielddata['aid'];
                         }
                         $question = $fielddata['question'];
                         break;
@@ -4122,6 +4123,33 @@
                     switch ($type)
                     {
                         case 'L':// What using sq: it's only on question + one other if other is set. This don't set the other subq here.
+//                            if (!is_null($ansArray))
+//                            {
+//                                foreach (array_keys($ansArray) as $key)
+//                                {
+//                                    $parts = explode('~',$key);
+//                                    if ($parts[1] == '-oth-') {
+//                                        $parts[1] = 'other';
+//                                    }
+//                                    $q2subqInfo[$questionNum]['subqs'][] = array(
+//                                        'rowdivid' => $surveyid . 'X' . $groupNum . 'X' . $questionNum . $parts[1],
+//                                        'varName' => $varName,
+//                                        'jsVarName' => $jsVarName,
+//                                        'jsVarName_on' => $jsVarName_on,
+//                                        'sqsuffix' => '_' . $parts[1],
+//                                    );
+//                                }
+//                            }
+
+                            $q2subqInfo[$questionNum]['subqs'][] = array(
+                                'rowdivid' => $surveyid . 'X' . $groupNum . 'X' . $questionNum . $fielddata['aid'],
+                                'varName' => $varName,
+                                'jsVarName' => $jsVarName,
+                                'jsVarName_on' => $jsVarName_on,
+                                'csuffix' => $csuffix,
+                                'sqsuffix' => $sqsuffix
+                            );
+                            break;
                         case '!':
                             if (!is_null($ansArray))
                             {
@@ -9946,21 +9974,24 @@ report~numKids > 0~message~{name}, you said you are {age} and that you have {num
 
                     foreach ($ansList as $ans=>$value)
                     {
-                        $ansInfo = explode('~',$ans);
-                        $valParts = explode('|',$value);
+                        $ansInfo = explode('~',$ans); // scale_id | answer_code
+                        $scale_id = $ansInfo[0];
+                        $answer_code = $ansInfo[1];
+
+                        $valParts = explode('|',$value); // scale_id | answer_code
                         $valInfo = array();
                         $valInfo[0] = array_shift($valParts);
                         $valInfo[1] = implode('|',$valParts);
-                        if ($_scale != $ansInfo[0]) {
+                        if ($_scale != $scale_id) {
                             $i=1;
-                            $_scale = $ansInfo[0];
+                            $_scale = $scale_id;
                         }
 
                         $subQeqn = '';
-                        $rowdivid = $sgqas[0] . $ansInfo[1];
+                        $rowdivid = $sgqas[0] . $answer_code;
                         if ($q['info']['type'] == 'R')
                         {
-                            $rowdivid = $LEM->sid . 'X' . $gid . 'X' . $qid . $ansInfo[1];
+                            $rowdivid = $LEM->sid . 'X' . $gid . 'X' . $qid . $answer_code;
                         }
                         if (isset($LEM->subQrelInfo[$qid][$rowdivid]))
                         {
@@ -9971,6 +10002,7 @@ report~numKids > 0~message~{name}, you said you are {age} and that you have {num
                                 ++$errorCount;
                             }
                         }
+
                         $sAnswerText=$valInfo[1];
                         $LEM->ProcessString($sAnswerText, $qid,$qReplacement,1,1,false,false);
                         $sAnswerText = viewHelper::purified(viewHelper::filterScript($LEM->GetLastPrettyPrintExpression()));
@@ -9978,9 +10010,9 @@ report~numKids > 0~message~{name}, you said you are {age} and that you have {num
                             ++$errorCount;
                         }
                         $answerRows .= "<tr class='LEManswer'>"
-                        . "<td>A[" . $ansInfo[0] . "]-" . $i++ . "</td>"
-                        . "<td><b>" . $ansInfo[1]. "</b></td>"
-                        . "<td>[VALUE: " . $valInfo[0] . "]".$subQeqn."</td>"
+                        . "<td>A[" . $scale_id . "]-" . $i++ . "</td>"
+                        . "<td><b>" . $answer_code. "</b></td>"
+                        . "<td>[VALUE: " . $scale_id . "]" . $subQeqn . "</td>"
                         . "<td>" . $sAnswerText . "</td>"
                         . "</tr>\n";
                     }
