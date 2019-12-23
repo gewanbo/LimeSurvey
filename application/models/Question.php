@@ -883,44 +883,61 @@ class Question extends LSActiveRecord
 
         $ansresult = dbExecuteAssoc($ansquery)->readAll();
 
-        if($random){
-            $random_list = [];
-            $fixed_list  = [];
+        $randomOrder = $this->getQuestionAttrByKey('random_order', $random);
+        $randomGroupOrder = $this->getQuestionAttrByKey('random_group_order', 0);
 
-            $total_question_num = count($ansresult);
-            // arrange to two groups
-            foreach($ansresult as $question){
-                if($question['fixed_position'] == '1'){
-                    $fixed_list[] = $question;
-                } else {
-                    $random_list[] = $question;
-                }
+        if($randomOrder){
+
+            $groups = [];
+
+            foreach($ansresult as $item){
+                $groupKey = $item['code'][0];
+                $groups[$groupKey][] = $item;
             }
 
-            $ansresult = null;
+            $ansresult = [];
 
-            shuffle($random_list);
+            if($randomGroupOrder){
+                shuffle($groups);
+            }
 
-            $resort_list = [];
-            $current_position = 1;
-            foreach($fixed_list as $question){
-                while($question['sortorder'] - $current_position > 0){
+            foreach($groups as $group) {
+
+                $random_list = [];
+                $fixed_list = [];
+
+                $total_question_num = count($group);
+                // arrange to two groups
+                foreach ($group as $question) {
+                    if ($question['fixed_position'] == '1') {
+                        $fixed_list[] = $question;
+                    } else {
+                        $random_list[] = $question;
+                    }
+                }
+
+                shuffle($random_list);
+
+                $resort_list = [];
+                $current_position = 1;
+                foreach ($fixed_list as $question) {
+                    while ($question['sortorder'] - $current_position > 0) {
+                        $resort_list[] = array_pop($random_list);
+                        $current_position++;
+                    }
+                    $resort_list[] = $question;
+                    $current_position++;
+                }
+                while ($total_question_num - $current_position >= 0) {
                     $resort_list[] = array_pop($random_list);
                     $current_position++;
                 }
-                $resort_list[] = $question;
-                $current_position++;
-            }
-            while ($total_question_num - $current_position >= 0){
-                $resort_list[] = array_pop($random_list);
-                $current_position++;
-            }
 
-            $ansresult = &$resort_list;
+                $ansresult = array_merge($ansresult, $resort_list);
+            }
         }
 
         return $ansresult;
-
     }
 
     public function getOrderedAnswerByScaleId($scale_id=0, $random = 0, $alpha = 0)
@@ -1227,4 +1244,14 @@ class Question extends LSActiveRecord
         Yii::log(\CVarDumper::dumpAsString($oRecord->getErrors()), 'warning', 'application.models.Question.insertRecords');
     }
 
+    public function getQuestionAttrByKey($attrKey, $defaultVal = null){
+        foreach($this->questionAttributes as $attr){
+            if($attr instanceof QuestionAttribute){
+                if($attr->attribute == $attrKey){
+                    return $attr->value;
+                }
+            }
+        }
+        return $defaultVal;
+    }
 }
