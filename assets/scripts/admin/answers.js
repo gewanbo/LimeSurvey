@@ -344,6 +344,8 @@ function updaterowproperties()
             $(this).find('.answer').attr('name','answer_'+language+'_'+rownumber+'_'+scale_id);
             $(this).find('.assessment').attr('id','assessment_'+rownumber+'_'+scale_id);
             $(this).find('.assessment').attr('name','assessment_'+rownumber+'_'+scale_id);
+            $(this).find('.relevance').attr('id','relevance_'+rownumber+'_'+scale_id);
+            $(this).find('.relevance').attr('name','relevance_'+rownumber+'_'+scale_id);
 
             // Newly inserted row editor button
             $(this).find('.editorLink').attr('href','javascript:start_popup_editor(\'answer_'+language+'_'+rownumber+'_'+scale_id+'\',\'[Answer:]('+language+')\',\''+sID+'\',\''+gID+'\',\''+qID+'\',\'editanswer\',\'editanswer\')');
