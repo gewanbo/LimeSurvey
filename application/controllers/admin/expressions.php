@@ -43,10 +43,11 @@ class Expressions extends Survey_Common_Action
             
             
             App()->getClientScript()->registerPackage('jqueryui');
-            
+            App()->getClientScript()->registerPackage('expressions');/* Why we need it ? */
             App()->getClientScript()->registerPackage('decimal');
             App()->getClientScript()->registerScriptFile(App()->getConfig('generalscripts').'survey_runtime.js');
-            App()->getClientScript()->registerScriptFile(App()->getConfig('generalscripts').'/expressions/em_javascript.js');
+            App()->getClientScript()->registerPackage('expression-extend');
+
             $this->_printOnLoad(Yii::app()->request->getQuery('sa', 'index'));
             $aData['pagetitle'] = "ExpressionManager:  {$aData['sa']}";
             $aData['subaction'] = $this->_printTitle($aData['sa']);
@@ -60,6 +61,10 @@ class Expressions extends Survey_Common_Action
                 $this->_renderWrappedTemplate('expressions', 'test_view', $aData);
             }
         }
+    }
+
+    public function getReplacements($replacementClass){
+        die('TEST');
     }
 
     public function survey_logic_file()
@@ -86,7 +91,7 @@ class Expressions extends Survey_Common_Action
         $language = Yii::app()->request->getParam('lang', null); 
         
         if ($language !== null) {
-                    $language = sanitize_languagecode($language);
+            $language = sanitize_languagecode($language);
         }
 
         $aData['lang'] = $language;
@@ -98,8 +103,7 @@ class Expressions extends Survey_Common_Action
         $aData['subaction'] = gT("Survey logic file");
         $aData['sidemenu']['state'] = false;
         $aData['survey'] = $oSurvey;
-        
-        $LEM_DEBUG_TIMING = Yii::app()->request->getParam('LEM_DEBUG_TIMING', LEM_DEBUG_TIMING);
+        $LEM_DEBUG_TIMING = Yii::app()->request->getParam('LEM_DEBUG_TIMING',(App()->getConfig('debug')>0)?LEM_DEBUG_TIMING:0);
         $LEM_DEBUG_VALIDATION_SUMMARY = Yii::app()->request->getParam('LEM_DEBUG_VALIDATION_SUMMARY', LEM_DEBUG_VALIDATION_SUMMARY);
         $LEM_DEBUG_VALIDATION_DETAIL = Yii::app()->request->getParam('LEM_DEBUG_VALIDATION_DETAIL', LEM_DEBUG_VALIDATION_DETAIL);
         $LEM_PRETTY_PRINT_ALL_SYNTAX = Yii::app()->request->getParam('LEM_PRETTY_PRINT_ALL_SYNTAX', LEM_PRETTY_PRINT_ALL_SYNTAX);
@@ -129,6 +133,12 @@ class Expressions extends Survey_Common_Action
             $aData['questionbar']['closebutton']['url'] = 'admin/questions/sa/view/surveyid/'.$sid.'/gid/'.$gid.'/qid/'.$qid;
             $aData['qid'] = $qid;
         }
+
+        App()->getClientScript()->registerPackage('decimal');
+        App()->getClientScript()->registerScriptFile('SCRIPT_PATH', 'survey_runtime.js');
+        App()->getClientScript()->registerPackage('expressions');/* Why we need it ? */
+        App()->getClientScript()->registerPackage('expression-extend');
+        App()->getClientScript()->registerCssFile(Yii::app()->getConfig('publicstyleurl').'expressionlogicfile.css');
 
         SetSurveyLanguage($sid, $language);
 
@@ -168,6 +178,12 @@ class Expressions extends Survey_Common_Action
     {
 
         $aData['surveylist'] = getSurveyList();
+        
+        App()->getClientScript()->registerPackage('decimal');
+        App()->getClientScript()->registerScriptFile('SCRIPT_PATH', 'survey_runtime.js');
+        App()->getClientScript()->registerPackage('expressions');
+        App()->getClientScript()->registerPackage('expression-extend');
+
         $this->_renderWrappedTemplate('expressions', 'test/survey_logic_form', $aData);        
     }
 
@@ -176,7 +192,7 @@ class Expressions extends Survey_Common_Action
         if ($which == 'survey_logic_file') {
             $which = 'survey_logic_form';
         }
-            $this->_renderWrappedTemplate('expressions', 'test/'.$which, $aData);
+        $this->_renderWrappedTemplate('expressions', 'test/'.$which, $aData);
         //$this->getController()->render('/admin/expressions/test/'.$which);
     }
 

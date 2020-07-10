@@ -142,7 +142,7 @@ class SurveymenuEntries extends LSActiveRecord
         $statistics =
         Yii::app()->db->createCommand()->select('MIN(ordering) as loworder, MAX(ordering) as highorder, COUNT(id) as count')
                 ->from('{{surveymenu_entries}}')
-                ->where(['menu_id = :menu_id'], ['menu_id' => (int) $menuId])
+                ->where('menu_id = :menu_id', ['menu_id' => (int) $menuId])
                 ->queryRow();
         if (($statistics['loworder'] != 1) || ($statistics['highorder'] != $statistics['count'])) {
             $current = 1;
@@ -526,7 +526,6 @@ class SurveymenuEntries extends LSActiveRecord
 
         } catch (Exception $e) {
             throw $e;
-            return false;
         }
         return true;
     }

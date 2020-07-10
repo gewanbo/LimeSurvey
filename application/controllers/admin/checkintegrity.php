@@ -135,7 +135,6 @@ class CheckIntegrity extends Survey_Common_Action
             $aData = $this->_deleteQuestions($aDelete['questions'], $aData);
         }
 
-
         if (isset($aDelete['groups'])) {
             $aData = $this->_deleteGroups($aDelete['groups'], $aData);
         }
@@ -394,7 +393,8 @@ class CheckIntegrity extends Survey_Common_Action
         $aRecords = DefaultValue::model()->findAll($criteria);
         $count = 0;
         foreach ($aRecords as $aRecord) {
-            $deleted = DefaultValue::model()->deleteAllByAttributes($aRecord);
+            DefaultValueL10n::model()->deleteAllByAttributes(array('dvid' => $aRecord->dvid));
+            $deleted = DefaultValue::model()->deleteAllByAttributes(array('dvid' => $aRecord->dvid));
             $count += $deleted ;
         }
         $aData['messages'][] = sprintf(gT('Deleting orphaned default values: %u default values deleted.'),$count);
@@ -449,7 +449,7 @@ class CheckIntegrity extends Survey_Common_Action
     /**
      * This function checks the LimeSurvey database for logical consistency and returns an according array
      * containing all issues in the particular tables.
-     * @returns array Array with all found issues.
+     * @return array Array with all found issues.
      */
     protected function _checkintegrity()
     {
@@ -508,7 +508,7 @@ class CheckIntegrity extends Survey_Common_Action
                 foreach ($aColumns as $oColumn) {
 
                     // Question columns start with the SID
-                    if (strpos($oColumn->name, $oSurvey->sid) !== false) {
+                    if (strpos($oColumn->name, (string)$oSurvey->sid) !== false) {
 
                         // Fileds are separated by X
                         $aFields   = explode('X', $oColumn->name);
@@ -538,7 +538,7 @@ class CheckIntegrity extends Survey_Common_Action
                                 if ($oQuestion->gid != $sGid){
 
                                     // If not, we change the column name
-                                    $sNvColName = $oSurvey->sid . 'X'. $oQuestion->groups->gid . 'X' . $sDirtyQid;
+                                    $sNvColName = $oSurvey->sid . 'X'. $oQuestion->group->gid . 'X' . $sDirtyQid;
 
                                     if ( array_key_exists( $sNvColName, $aColumns ) ){
                                         // This case will not happen often, only when QID + Subquestion ID == QID of a question in the target group
@@ -800,7 +800,8 @@ class CheckIntegrity extends Survey_Common_Action
         /*     Check questions                                                */
         /**********************************************************************/
         $oCriteria = new CDbCriteria;
-        $oCriteria->join = 'LEFT JOIN {{surveys}} s ON t.sid=s.sid LEFT JOIN {{groups}} g ON t.gid=g.gid';
+        $quotedGroups = Yii::app()->db->quoteTableName('{{groups}}');
+        $oCriteria->join = "LEFT JOIN {{surveys}} s ON t.sid=s.sid LEFT JOIN $quotedGroups g ON t.gid=g.gid";
         $oCriteria->condition = '(g.gid IS NULL) OR (s.sid IS NULL)';
         $questions = Question::model()->findAll($oCriteria);
         foreach ($questions as $question) {
@@ -848,8 +849,6 @@ class CheckIntegrity extends Survey_Common_Action
             $aFullOldSIDs[$iSurveyID][] = $sTable;
         }
         $aOldSIDs = array_unique($aOldSIDs);
-        //$sQuery = 'SELECT sid FROM {{surveys}} ORDER BY sid';
-        //$oResult = dbExecuteAssoc($sQuery) or safeDie('Couldn\'t get unique survey ids');
         $surveys = Survey::model()->findAll();
 
         $aSIDs = array();
@@ -1018,12 +1017,12 @@ class CheckIntegrity extends Survey_Common_Action
      */
     protected function checkGroupOrderDuplicates()
     {
+        $quotedGroups = Yii::app()->db->quoteTableName('{{groups}}');
         $sQuery = "
             SELECT
                 g.sid
-            FROM {{groups}} g
+            FROM $quotedGroups g
             JOIN {{surveys}} s ON s.sid = g.sid
-            WHERE g.language = s.language
             GROUP BY g.sid
             HAVING COUNT(DISTINCT g.group_order) != COUNT(g.gid)";
         $result = Yii::app()->db->createCommand($sQuery)->queryAll();
@@ -1047,6 +1046,7 @@ class CheckIntegrity extends Survey_Common_Action
      */
     protected function checkQuestionOrderDuplicates()
     {
+        $quotedGroups = Yii::app()->db->quoteTableName('{{groups}}');
         $sQuery = "
             SELECT
                 q.sid,
@@ -1054,9 +1054,8 @@ class CheckIntegrity extends Survey_Common_Action
                 q.parent_qid,
                 q.scale_id
             FROM {{questions}} q
-            JOIN {{groups}} g ON q.gid = g.gid
+            JOIN $quotedGroups g ON q.gid = g.gid
             JOIN {{surveys}} s ON s.sid = q.sid
-            WHERE q.language = s.language AND g.language = s.language
             GROUP BY q.sid, q.gid, q.parent_qid, q.scale_id
             HAVING COUNT(DISTINCT question_order) != COUNT(qid);
             ";

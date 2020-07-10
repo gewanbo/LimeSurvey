@@ -13,7 +13,7 @@
 
             <div class="jumbotron message-box">
                 <div class='row'>
-                    <h2><?php echo sprintf(gT("New answer for quota '%s'"), $oQuota->name);?></h2>
+                    <h2><?php echo sprintf(gT("New answer for quota '%s'"), htmlentities($oQuota->name));?></h2>
                     <p class="lead">
                         <?php eT("Select question");?>:
                     </p>
@@ -23,7 +23,7 @@
                                 <select class='form-control' name="quota_qid" size="15">
                                     <?php foreach ($oQuota->survey->quotableQuestions as $questionlisting) { ?>
                                         <option value="<?php echo $questionlisting['qid'];?>">
-                                            <?php echo $questionlisting['title'];?>: <?php echo strip_tags(substr($questionlisting['question'],0,40));?>
+                                            <?php echo $questionlisting['title'];?>: <?php echo strip_tags(substr($questionlisting->questionl10ns[$sBaseLang]->question,0,40));?>
                                         </option>
                                         <?php } ?>
                                 </select>

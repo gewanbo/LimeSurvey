@@ -43,7 +43,7 @@ class TemplateManifest extends TemplateConfiguration
     {
         libxml_disable_entity_loader(false);
         $config = simplexml_load_file(realpath($this->xmlFile));
-        $config->metadata->last_update = date("Y-m-d H:i:s");
+        $config->metadata->lastUpdate = date("Y-m-d H:i:s");
         $config->asXML(realpath($this->xmlFile)); // Belt
         touch($this->path); // & Suspenders ;-)
         libxml_disable_entity_loader(true);
@@ -844,20 +844,33 @@ class TemplateManifest extends TemplateConfiguration
 
     /**
      * Change the date inside the DOMDocument
+     * Used only when copying/extend a survey
      * @param DOMDocument   $oNewManifest  The DOMDOcument of the manifest
      * @param string        $sDate         The wanted date, if empty the current date with config time adjustment will be used
      */
     public static function changeDateInDOM($oNewManifest, $sDate = '')
     {
-        $date           = (empty($date)) ?dateShift(date("Y-m-d H:i:s"), "Y-m-d H:i", Yii::app()->getConfig("timeadjust")) : $date;
-        $oConfig        = $oNewManifest->getElementsByTagName('config')->item(0);
+        $sDate = (empty($sDate)) ? dateShift(date("Y-m-d H:i:s"), "Y-m-d H:i", Yii::app()->getConfig("timeadjust")) : $sDate;
+        $oConfig = $oNewManifest->getElementsByTagName('config')->item(0);
         $ometadata = $oConfig->getElementsByTagName('metadata')->item(0);
-        $oOldDateNode   = $ometadata->getElementsByTagName('creationDate')->item(0);
+        if($ometadata->getElementsByTagName('creationDate')) {
+            $oOldDateNode   = $ometadata->getElementsByTagName('creationDate')->item(0);
+        }
         $oNvDateNode    = $oNewManifest->createElement('creationDate', $sDate);
-        $ometadata->replaceChild($oNvDateNode, $oOldDateNode);
-        $oOldUpdateNode = $ometadata->getElementsByTagName('last_update')->item(0);
-        $oNvDateNode    = $oNewManifest->createElement('last_update', $sDate);
-        $ometadata->replaceChild($oNvDateNode, $oOldUpdateNode);
+        if(empty($oOldDateNode)) {
+            $ometadata->appendChild($oNvDateNode);
+        } else {
+            $ometadata->replaceChild($oNvDateNode, $oOldDateNode);
+        }
+        if($ometadata->getElementsByTagName('lastUpdate')) {
+            $oOldUpdateNode   = $ometadata->getElementsByTagName('lastUpdate')->item(0);
+        }
+        $oNvDateNode    = $oNewManifest->createElement('lastUpdate', $sDate);
+        if(empty($oOldUpdateNode)) {
+            $ometadata->appendChild($oNvDateNode);
+        } else {
+            $ometadata->replaceChild($oNvDateNode, $oOldUpdateNode);
+        }
     }
 
     /**
@@ -1352,7 +1365,115 @@ class TemplateManifest extends TemplateConfiguration
         return $sTemplateNames;
     }
 
+    /**
+     * Get options_page value from template configuration
+     */
+    public static function getOptionAttributes($path){
+        libxml_disable_entity_loader(false);
+        $file = realpath($path."config.xml");
+        if (file_exists($file)) {
+            $sXMLConfigFile        = file_get_contents($file);
+            $oXMLConfig = simplexml_load_string($sXMLConfigFile);
+            $aOptions['categories'] = array();
+            
+            foreach($oXMLConfig->options->children() as $key  => $option){
+                $aOptions['optionAttributes'][$key]['type'] = !empty($option['type']) ? (string)$option['type'] : '';
+                $aOptions['optionAttributes'][$key]['title'] = !empty($option['title']) ? (string)$option['title'] : '';
+                $aOptions['optionAttributes'][$key]['category'] = !empty($option['category']) ? (string)$option['category'] : gT('Simple options');
+                $aOptions['optionAttributes'][$key]['width'] = !empty($option['width']) ? (string)$option['width'] : '2';
+                $aOptions['optionAttributes'][$key]['options'] = !empty($option['options']) ? (string)$option['options'] : '';
+                $aOptions['optionAttributes'][$key]['optionlabels'] = !empty($option['optionlabels']) ? (string)$option['optionlabels'] : '';
+                $aOptions['optionAttributes'][$key]['parent'] = !empty($option['parent']) ? (string)$option['parent'] : '';
 
+                if (!empty($option->dropdownoptions)){
+                    $dropdownOptions = '';
+                    if ($key == 'font'){
+                        $dropdownOptions .= TemplateManifest::getFontDropdownOptions();
+                    }
+                    foreach($option->xpath('//options/' . $key . '/dropdownoptions') as $option){
+                        $dropdownOptions .= $option->asXml();
+                    }
+
+                    $aOptions['optionAttributes'][$key]['dropdownoptions'] = $dropdownOptions;
+                } else {
+                    $aOptions['optionAttributes'][$key]['dropdownoptions'] = '';
+                }
+
+                if (!in_array($aOptions['optionAttributes'][$key]['category'], $aOptions['categories'])){
+                    $aOptions['categories'][] = $aOptions['optionAttributes'][$key]['category'];
+                }
+            }
+
+            $aOptions['optionsPage'] = !empty((array)$oXMLConfig->engine->optionspage) ? ((array)$oXMLConfig->engine->optionspage)[0] : false;
+
+            return $aOptions;
+        }
+        return false;
+    }
+
+    public static function getFontDropdownOptions(){
+        $fontOptions = '';
+        $fontPackages = App()->getClientScript()->fontPackages;
+        $coreFontPackages = $fontPackages['core'];
+        $userFontPackages = $fontPackages['user'];
+
+        // generate CORE fonts package list
+        $i = 0;
+        foreach($coreFontPackages as $coreKey => $corePackage){
+            $i+=1;
+            if ($i === 1){
+                $fontOptions .='<optgroup  label="' . gT("Local Server") . ' - ' . gT("Core") . '">';
+            }
+            $fontOptions .='<option class="font-' . $coreKey . '"     value="' . $coreKey . '"     data-font-package="' . $coreKey . '"      >' . $corePackage['title'] . '</option>';
+        }
+        if ($i > 0){
+            $fontOptions .='</optgroup>';
+        }
+
+        // generate USER fonts package list
+        $i = 0;
+        foreach($userFontPackages as $userKey => $userPackage){
+            $i+=1;
+            if ($i === 1){
+                $fontOptions .='<optgroup  label="' . gT("Local Server") . ' - ' . gT("User") . '">';
+            }
+            $fontOptions .='<option class="font-' . $userKey . '"     value="' . $userKey . '"     data-font-package="' . $userKey . '"      >' . $userPackage['title'] . '</option>';
+        }
+        if ($i > 0){
+            $fontOptions .='</optgroup>';
+        }
+
+        $fontOptions .='';
+        return $fontOptions;
+    }
+
+    /**
+     * Twig statements can be used in Theme description
+     * Override method from TemplateConfiguration to use the description from the XML
+     * @return string description from the xml
+     */
+    public function getDescription()
+    {
+        $sDescription = $this->config->metadata->description;
+
+          // If wrong Twig in manifest, we don't want to block the whole list rendering
+          // Note: if no twig statement in the description, twig will just render it as usual
+        try {
+            $sDescription = App()->twigRenderer->convertTwigToHtml($this->config->metadata->description);
+        } catch (\Exception $e) {
+          // It should never happen, but let's avoid to anoy final user in production mode :)
+            if (YII_DEBUG) {
+                App()->setFlashMessage(
+                    "Twig error in template " .
+                    $this->sTemplateName .
+                    " description <br> Please fix it and reset the theme <br>" . $e->getMessage(),
+                    'error'
+                );
+            }
+        }
+
+        return $sDescription;
+    }
 
     /**
      * PHP getter magic method.

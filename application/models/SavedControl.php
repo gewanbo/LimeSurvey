@@ -31,6 +31,14 @@
 class SavedControl extends LSActiveRecord
 {
 
+    /**
+     * Set defaults
+     * @inheritdoc
+     */
+    public function init()
+    {
+        $this->ip = "";
+    }
     /** @inheritdoc */
     public function tableName()
     {
@@ -96,6 +104,11 @@ class SavedControl extends LSActiveRecord
         return $record->deleteAll($criteria);
     }
 
+    /**
+     * @param $data
+     * @return mixed
+     * @deprecated at 2018-02-03 use $model->attributes = $data && $model->save()
+     */
     public function insertRecords($data)
     {
         return $this->db->insert('saved_control', $data);
@@ -180,13 +193,13 @@ class SavedControl extends LSActiveRecord
     {
         // @todo Please modify the following code to remove attributes that should not be searched.
         $criteria = new CDbCriteria;
-        $criteria->compare('sid', $this->sid, true); //will not be searchable
+        $criteria->compare('sid', $this->sid, false); //will not be searchable
         $criteria->compare('srid', $this->srid, true);
         $criteria->compare('access_code', $this->access_code, true);
 
         $criteria->compare('scid', $this->scid);
         $criteria->compare('identifier', $this->identifier, true);
-        $criteria->compare('email', $this->email);
+        $criteria->compare('email', $this->email, true);
         $criteria->compare('ip', $this->ip, true);
         $criteria->compare('saved_thisstep', $this->saved_thisstep, true);
         $criteria->compare('status', $this->status, true);

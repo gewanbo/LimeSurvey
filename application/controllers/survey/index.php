@@ -117,7 +117,20 @@ class index extends CAction
             $tokensexist = 1;
         }
 
-
+        // maintenance mode
+        $sMaintenanceMode = getGlobalSetting('maintenancemode');
+        if ($sMaintenanceMode == 'hard'){
+            if ($previewmode === false){
+                Yii::app()->twigRenderer->renderTemplateFromFile("layout_maintenance.twig", array('oSurvey'=>Survey::model()->findByPk($surveyid), 'aSurveyInfo'=>$thissurvey), false);
+            }
+        } elseif ($sMaintenanceMode == 'soft'){
+            if ($move === null){
+                if ($previewmode === false){
+                    Yii::app()->twigRenderer->renderTemplateFromFile("layout_maintenance.twig", array('oSurvey'=>Survey::model()->findByPk($surveyid), 'aSurveyInfo'=>$thissurvey), false);
+                }
+            }
+        }
+                  
         if ($tokensexist == 1 && isset($token) && $token != "" && tableExists("{{tokens_".$surveyid."}}") && !$previewmode) {
 
             // check also if it is allowed to change survey after completion
@@ -128,6 +141,10 @@ class index extends CAction
             }
             if (empty($tokenInstance)) {
                 $oToken = Token::model($surveyid)->findByAttributes(array('token' => $token));
+            }
+            if(empty($oToken)) {
+                // #16142 quick fix : unset invalid token
+                $token = null;
             }
         }
 
@@ -144,8 +161,8 @@ class index extends CAction
             $sDisplayLanguage = $_SESSION['survey_'.$surveyid]['s_lang'];
         } elseif ( !empty($oToken) ) {
             $sDisplayLanguage = $oToken->language;
-        }elseif (Survey::model()->findByPk($surveyid)) {
-            $sDisplayLanguage = Survey::model()->findByPk($surveyid)->language;
+        } elseif ($oSurvey) {
+            $sDisplayLanguage = $oSurvey->language;
         }
 
         if ($surveyid && $surveyExists) {
@@ -159,8 +176,8 @@ class index extends CAction
 
         if ($this->_isClientTokenDifferentFromSessionToken($clienttoken, $surveyid)) {
             $sReloadUrl = $this->getController()->createUrl("/survey/index/sid/{$surveyid}", array('token'=>$clienttoken, 'lang'=>App()->language, 'newtest'=>'Y'));
-            $aErrors    = array(gT('Token mismatch'));
-            $asMessage  = array(gT('The token you provided doesn\'t match the one in your session.'));
+            $aErrors    = array(gT('Access code mismatch'));
+            $asMessage  = array(gT('The access code you provided doesn\'t match the one in your session.'));
             $aUrl       = array(
                             'url'=>$sReloadUrl,
                             'type'=>'restart-survey',
@@ -291,6 +308,7 @@ class index extends CAction
 
         //GET BASIC INFORMATION ABOUT THIS SURVEY
         $thissurvey = getSurveyInfo($surveyid, $_SESSION['survey_'.$surveyid]['s_lang']);
+        EmCacheHelper::init($thissurvey);
         /* Unsure it still work, and surely better in afterFindSurvey */
         if (!is_null($beforeSurveyPageEvent->get('template'))) {
             $thissurvey['templatedir'] = $beforeSurveyPageEvent->get('template');
@@ -346,7 +364,7 @@ class index extends CAction
         //CHECK FOR PREVIOUSLY COMPLETED COOKIE
         //If cookies are being used, and this survey has been completed, a cookie called "PHPSID[sid]STATUS" will exist (ie: SID6STATUS) and will have a value of "COMPLETE"
         $sCookieName = "LS_".$surveyid."_STATUS";
-        if (isset($_COOKIE[$sCookieName]) && $_COOKIE[$sCookieName] == "COMPLETE" && $thissurvey['usecookie'] == "Y" && $tokensexist != 1 && (!isset($param['newtest']) || $param['newtest'] != "Y")) {
+        if (!$previewmode && isset($_COOKIE[$sCookieName]) && $_COOKIE[$sCookieName] == "COMPLETE" && $thissurvey['usecookie'] == "Y" && $tokensexist != 1 && (!isset($param['newtest']) || $param['newtest'] != "Y")) {
 
             $aErrors  = array(gT('Error'));
             $aMessage = array(
@@ -427,7 +445,7 @@ class index extends CAction
             $SurveyRuntimeHelper = new SurveyRuntimeHelper();
             $SurveyRuntimeHelper->saveAllIfNeeded();
 
-            if (isCaptchaEnabled('saveandloadscreen', Survey::model()->findByPk($surveyid)->usecaptcha)) {
+            if (isCaptchaEnabled('saveandloadscreen', $oSurvey->usecaptcha)) {
                 $aLoadForm['aCaptcha']['show'] = true;
                 $aLoadForm['aCaptcha']['sImageUrl'] = Yii::app()->getController()->createUrl('/verification/image', array('sid'=>$surveyid));
             }
@@ -451,44 +469,40 @@ class index extends CAction
         // this check is done in buildsurveysession and error message
         // could be more interresting there (takes into accound captcha if used)
         if ($tokensexist == 1 && isset($token) && $token != "" && tableExists("{{tokens_".$surveyid."}}") && !$previewmode) {
-            if (empty($tokenInstance)) {
-                if ($oToken) {
-                    $now = dateShift(date("Y-m-d H:i:s"), "Y-m-d H:i:s", Yii::app()->getConfig("timeadjust"));
+            if (empty($tokenInstance) && $oToken) {
+                $now = dateShift(date("Y-m-d H:i:s"), "Y-m-d H:i:s", Yii::app()->getConfig("timeadjust"));
 
-                    // This can not happen (TokenInstance must fix this)
-                    if ($oToken->completed != 'N' && !empty($oToken->completed)) {
-                        $sError = gT("This invitation has already been used.");
-                    } elseif ($oToken->usesleft < 1) {
-                        $sError = gT("This invitation has no uses left.");
-                    } elseif (strtotime($now) < strtotime($oToken->validfrom)) {
-                        $sError = gT("This invitation is not valid yet.");
-                    } elseif (strtotime($now) > strtotime($oToken->validuntil)) {
-                        $sError = gT("This invitation is not valid anymore.");
-                    } else {
-                        // This can not happen
-                        $sError = gT("This is a controlled survey. You need a valid token to participate.");
-                    }
-
-                    $aMessage = array(
-                        gT("We are sorry but you are not allowed to enter this survey."),
-                        sprintf(gT("Please contact %s ( %s ) for further assistance."), $thissurvey['adminname'], $thissurvey['adminemail'])/* Maybe better to move this to a global replacement 'surveycontact' */
-                    );
-
-                    $event = new PluginEvent('onSurveyDenied');
-                    $event->set('surveyId', $surveyid);
-                    $event->set('reason', 'invalidToken');
-                    App()->getPluginManager()->dispatchEvent($event);
-
-                    App()->getController()->renderExitMessage(
-                        $surveyid,
-                        'survey-notstart',
-                        $aMessage,
-                        null,
-                        array($sError)
-                    );
+                // This can not happen (TokenInstance must fix this)
+                if ($oToken->completed != 'N' && !empty($oToken->completed)) {
+                    $sError = gT("This invitation has already been used.");
+                } elseif ($oToken->usesleft < 1) {
+                    $sError = gT("This invitation has no uses left.");
+                } elseif (strtotime($now) < strtotime($oToken->validfrom)) {
+                    $sError = gT("This invitation is not valid yet.");
+                } elseif (strtotime($now) > strtotime($oToken->validuntil)) {
+                    $sError = gT("This invitation is not valid anymore.");
                 } else {
-                    $sError = gT("This is a controlled survey. You need a valid token to participate.");
+                    // This can not happen
+                    $sError = gT("This is a controlled survey. You need a valid access code to participate.");
                 }
+
+                $aMessage = array(
+                    gT("We are sorry but you are not allowed to enter this survey."),
+                    sprintf(gT("Please contact %s ( %s ) for further assistance."), $thissurvey['adminname'], $thissurvey['adminemail'])/* Maybe better to move this to a global replacement 'surveycontact' */
+                );
+
+                $event = new PluginEvent('onSurveyDenied');
+                $event->set('surveyId', $surveyid);
+                $event->set('reason', 'invalidToken');
+                App()->getPluginManager()->dispatchEvent($event);
+
+                App()->getController()->renderExitMessage(
+                    $surveyid,
+                    'survey-notstart',
+                    $aMessage,
+                    null,
+                    array($sError)
+                );
             }
         }
 
@@ -625,8 +639,9 @@ class index extends CAction
 
     private function _loadLimesurveyLang($mvSurveyIdOrBaseLang)
     {
-        if (is_numeric($mvSurveyIdOrBaseLang) && Survey::model()->findByPk($mvSurveyIdOrBaseLang)) {
-            $baselang = Survey::model()->findByPk($mvSurveyIdOrBaseLang)->language;
+        $oSurvey = Survey::model()->findByPk($mvSurveyIdOrBaseLang);
+        if ($oSurvey) {
+            $baselang = $oSurvey->language;
         } elseif (!empty($mvSurveyIdOrBaseLang)) {
             $baselang = $mvSurveyIdOrBaseLang;
         } else {
